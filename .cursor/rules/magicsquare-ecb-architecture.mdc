@@ -1,0 +1,26 @@
+---
+description: ECB(boundary/control/entity) 아키텍처 및 의존성 방향 규칙
+alwaysApply: true
+---
+
+# ECB Architecture (boundary/control/entity)
+
+## 레이어 역할
+
+- **boundary**: 외부 입출력(UI/API/CLI) 담당
+- **control**: 유스케이스/흐름 제어(오케스트레이션) 담당
+- **entity**: 도메인 데이터/규칙(순수 로직) 담당
+
+## 의존성 방향
+
+- **허용**: `boundary -> control -> entity`
+- **금지**
+  - `entity -> control`
+  - `entity -> boundary`
+  - `control -> boundary`
+
+## 추가 규칙
+
+- I/O(입출력)는 **boundary에서만** 처리한다.
+- entity는 **프레임워크/입출력에 의존하지 않는다.**
+- control은 entity를 조합해 유스케이스를 완성하고 boundary 결과를 오케스트레이션한다.

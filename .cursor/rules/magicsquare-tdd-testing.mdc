@@ -1,0 +1,44 @@
+---
+description: TDD(RED/GREEN/REFACTOR) 및 pytest/AAA 테스트 규칙
+globs: **/tests/**/*.py
+alwaysApply: false
+---
+
+# TDD & Testing Rules (MagicSquare)
+
+## pytest/AAA
+
+- 프레임워크: **pytest**
+- 패턴: **AAA(Arrange-Act-Assert)**
+- 커버리지 최소 기준: **80%**
+
+## fixture
+
+- 기본은 **function scope**
+- session/module scope는 비용/성능 이슈가 명확할 때만
+- fixture는 Arrange 준비에만 사용(Assert 로직 금지)
+
+## 네이밍
+
+- 테스트 함수/메서드명은 `test_` 접두사 필수
+- 테스트 파일명은 `test_*.py` 규칙 준수
+
+## TDD 3단계
+
+### RED
+
+- 테스트를 먼저 작성하고, 실패(RED)를 **확인한 뒤에만** 구현으로 진행
+- 작성한 테스트가 **의도한 이유로 실패**하는지 확인
+- 최소 assertion으로 시작(실패 조건/메시지 명확화)
+
+### GREEN
+
+- 테스트를 통과시키는 **최소한의 코드만** 작성
+- 이 단계에서는 **리팩터링 금지**
+- 테스트가 요구하지 않는 스펙/코드는 추가하지 않는다.
+
+### REFACTOR
+
+- 기능 변경 없이 구조 개선(중복 제거, 책임 분리, ECB 경계 정리)
+- 테스트는 계속 통과해야 하며 신뢰도/커버리지 기준 유지
+- 테스트 삭제/완화/skip으로 통과시키기 금지

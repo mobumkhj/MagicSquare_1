@@ -1,0 +1,32 @@
+---
+description: ECB 기준 디렉터리/파일 구조 가이드
+alwaysApply: true
+---
+
+# File Structure (ECB)
+
+## 권장 트리
+
+```
+.
+├─ src/
+│  ├─ boundary/
+│  │  ├─ cli/
+│  │  └─ __init__.py
+│  ├─ control/
+│  │  └─ __init__.py
+│  ├─ entity/
+│  │  └─ __init__.py
+│  └─ __init__.py
+├─ tests/
+│  ├─ boundary/
+│  ├─ control/
+│  ├─ entity/
+│  └─ __init__.py
+├─ pyproject.toml
+└─ README.md
+```
+
+## 노트
+
+- ECB 기준 폴더 트리는 위 구조를 따른다.

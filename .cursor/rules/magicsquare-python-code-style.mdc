@@ -1,0 +1,22 @@
+---
+description: Python(Python 3.14+) 코드 스타일/타입힌트/도큐먼트 규칙
+globs: **/*.py
+alwaysApply: false
+---
+
+# Python Code Style (MagicSquare)
+
+## 버전/스타일
+
+- Python **3.14+**
+- **PEP8** 엄격 준수
+- 최대 라인 길이: **88**
+
+## 타입 힌트
+
+- 모든 함수/메서드의 **파라미터 및 반환값에 타입 힌트 필수**
+
+## Docstring
+
+- **Google 스타일**
+- 모든 **public** 함수/메서드에 docstring 필수

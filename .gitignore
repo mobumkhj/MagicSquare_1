@@ -8,3 +8,9 @@ Desktop.ini
 .idea/
 *.swp
 *~
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/

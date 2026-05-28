@@ -22,9 +22,11 @@
 | 항목 | 상태 |
 |------|------|
 | 문제 인식 (STEP 1~5) | 완료 |
-| 상세 보고서 | [Report/01. MagicSquare_ProblemRecognition_Report.md](Report/01.%20MagicSquare_ProblemRecognition_Report.md) |
-| 구현·설계·알고리즘 | 미착수 |
-| 테스트·소스 코드 | 없음 |
+| 아키텍처·계약·테스트 설계 | 완료 |
+| 상세 보고서 | [01. 문제 인식](Report/01.%20MagicSquare_ProblemRecognition_Report.md) · [02. 아키텍처·계약](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) · [07. PRD](Report/07.%20MagicSquare_PRD_Report.md) · [08. PRD 검토](Report/08.%20MagicSquare_PRD_Review_Report.md) |
+| PRD (구현 전 기준) | [07. PRD](Report/07.%20MagicSquare_PRD_Report.md) · [08. PRD 검토](Report/08.%20MagicSquare_PRD_Review_Report.md) |
+| 구현·알고리즘 | 미착수 |
+| 테스트·소스 코드 | User 엔티티 예제만 존재 |
 
 ---
 
@@ -92,8 +94,11 @@
 MagicSquare_xx/
 ├── README.md                 # 이 파일 (프로젝트 개요)
 ├── Report/
-│   └── 01. MagicSquare_ProblemRecognition_Report.md   # STEP 1~5 전체 보고서
-└── Prompting/                # (프롬프트·대화 산출물 보관용, 필요 시 정리)
+│   ├── 01. MagicSquare_ProblemRecognition_Report.md      # STEP 1~5 문제 인식
+│   └── 02. MagicSquare_Architecture_Contracts_Report.md  # Domain/UI/Data·통합 설계
+└── Prompting/
+    ├── 01. MagicSquare_ProblemRecognition_Transcript.md   # STEP 1~5 대화 Transcript
+    └── 02. MagicSquare_Full_Conversation_Transcript.md    # 전체 세션 통합 Transcript
 ```
 
 ---
@@ -114,6 +119,12 @@ MagicSquare_xx/
 | 문서 | 설명 |
 |------|------|
 | [01. MagicSquare_ProblemRecognition_Report.md](Report/01.%20MagicSquare_ProblemRecognition_Report.md) | STEP 1~5 통합 보고서 (구현·알고리즘 미포함) |
+| [02. MagicSquare_Architecture_Contracts_Report.md](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) | Dual-Track TDD / Clean Architecture 설계·계약·테스트·통합 (구현 코드 미포함) |
+| [07. MagicSquare_PRD_Report.md](Report/07.%20MagicSquare_PRD_Report.md) | 구현 전 PRD — 계약·불변식·Dual-Track TDD·Traceability (구현 코드 미포함) |
+| [08. MagicSquare_PRD_Review_Report.md](Report/08.%20MagicSquare_PRD_Review_Report.md) | PRD 7기준 검토 — 누락·모순·모호함 및 P0 백로그 (수정본 미포함) |
+| [02. MagicSquare_Full_Conversation_Transcript.md](Prompting/02.%20MagicSquare_Full_Conversation_Transcript.md) | 지금까지 User 프롬프트·대화 흐름 Export (통합 Transcript) |
+| [07. MagicSquare_PRD_Transcript.md](Prompting/07.%20MagicSquare_PRD_Transcript.md) | PRD 분석·작성 세션 Transcript Export |
+| [08. MagicSquare_PRD_Review_Transcript.md](Prompting/08.%20MagicSquare_PRD_Review_Transcript.md) | PRD 검토 세션 Transcript Export |
 
 ---
 

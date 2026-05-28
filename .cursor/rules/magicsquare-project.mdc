@@ -1,0 +1,30 @@
+---
+description: MagicSquare 프로젝트 공통 목표/제약 및 기본 운영 규칙
+alwaysApply: true
+---
+
+# MagicSquare Project Rules
+
+## 목표
+
+- Magic Square 문제를 **TDD로 해결**
+- **ECB(boundary/control/entity)** 아키텍처 준수
+
+## 제약
+
+- Python **3.14+**
+- **PEP8** 엄격 준수
+- **Type hints 필수**
+- 테스트: **pytest + AAA 패턴**
+- **Dual-Track TDD** 준수
+
+## 프로젝트 기본 운영
+
+- 디버깅용 `print()`는 사용하지 않는다.
+- 테스트 약화(삭제/완화/skip/의미 없는 assertion)로 통과시키지 않는다.
+- **RED(실패) 확인 없이 구현을 시작하지 않는다.**
+
+## 기본 구조(권장)
+
+- `src/` 아래에 ECB 레이어를 둔다: `boundary/`, `control/`, `entity/`
+- `tests/`도 레이어별로 대응 디렉터리를 둔다.

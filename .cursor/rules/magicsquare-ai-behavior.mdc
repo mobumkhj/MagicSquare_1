@@ -1,0 +1,24 @@
+---
+description: MagicSquare 작업 시 AI 작업 흐름(코딩 전/중/후) 규칙
+alwaysApply: true
+---
+
+# AI Behavior Rules
+
+## Before coding
+
+- 관련 테스트 파일(`tests/**`)을 먼저 확인하고, 없으면 **RED 테스트부터 작성**한다.
+- ECB 레이어 경계(`boundary/control/entity`) 위반 가능성이 있으면 설계/배치를 먼저 조정한다.
+- 타입힌트 없는 함수/메서드는 생성하지 않는다.
+
+## During coding
+
+- TDD 규칙을 준수한다: **RED 확인 없이 구현을 진행하지 않는다.**
+- GREEN 단계에서는 최소 코드만 작성하고 리팩터링을 하지 않는다.
+- ECB 의존성 방향을 지킨다: `boundary -> control -> entity`
+
+## After coding
+
+- 테스트 약화(삭제/완화/skip/의미 없는 assertion) 없이 모든 테스트가 통과하는지 확인한다.
+- 커버리지 최소 기준(80%)을 유지하도록 테스트를 보강한다.
+- TDD 규칙 또는 ECB 경계 위반이 감지되면, 채팅 응답에서 명확히 경고하고(원인/영향/대안) 진행을 멈춘다.
