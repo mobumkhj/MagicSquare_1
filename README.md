@@ -1,7 +1,7 @@
-# MagicSquare_xx
+# MagicSquare_07
 
 4×4 마방진(Magic Square)을 다루는 학습·실습 프로젝트입니다.  
-현재는 **구현 전 문제 인식(Problem Recognition)** 단계까지 완료된 상태입니다.
+**문제 인식(STEP 1~5)**, **아키텍처·계약 설계**, **PRD**까지 완료된 상태입니다.
 
 ---
 
@@ -22,21 +22,25 @@
 | 항목 | 상태 |
 |------|------|
 | 문제 인식 (STEP 1~5) | 완료 |
+| STEP 6 TDD 설계 문서 | 완료 ([Report/02.design.md](Report/02.design.md)) |
 | 아키텍처·계약·테스트 설계 | 완료 |
-| 상세 보고서 | [01. 문제 인식](Report/01.%20MagicSquare_ProblemRecognition_Report.md) · [02. 아키텍처·계약](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) · [07. PRD](Report/07.%20MagicSquare_PRD_Report.md) · [08. PRD 검토](Report/08.%20MagicSquare_PRD_Review_Report.md) |
-| PRD (구현 전 기준) | [07. PRD](Report/07.%20MagicSquare_PRD_Report.md) · [08. PRD 검토](Report/08.%20MagicSquare_PRD_Review_Report.md) |
+| PRD (구현 전 기준) | 완료 · [07. PRD](Report/07.%20MagicSquare_PRD_Report.md) · [08. PRD 검토](Report/08.%20MagicSquare_PRD_Review_Report.md) |
 | 구현·알고리즘 | 미착수 |
 | 테스트·소스 코드 | User 엔티티 예제만 존재 |
 
 ---
 
+## 진행 단계
+
+| 단계 | 내용 | 상태 |
+|------|------|------|
+| STEP 1~5 | 문제 인식 · Why chain · Invariant | 완료 |
+| STEP 6 | TDD 설계 | 완료 |
+| STEP 7 | 구현 | 예정 |
+
+---
+
 ## 문제 정의 요약 (STEP 5)
-
-### 표면 정의 (지양)
-
-> 4×4에 1~16을 넣어 행·열·대각선 합이 같은 마방진을 **완성하는** 프로그램을 만든다.
-
-생성·검증·학습이 한 문장에 섞이고, 성공 기준과 실패 상태가 불명확합니다.
 
 ### 개선된 정의 (기준)
 
@@ -64,67 +68,16 @@
 
 ---
 
-## 문제 인식 단계 (STEP 1~5)
-
-| 단계 | 주제 | 핵심 산출 |
-|------|------|-----------|
-| STEP 1 | 관찰 (Observation) | 16칸 배치 + 합 제약; 프로그램으로 다루려는 상황 |
-| STEP 2 | Why #1 | “완성”만으로는 목적이 모호 → 판정·생성 분리 필요 |
-| STEP 3 | Why #2 | 반복 가능성, 검증 자동화, 오류 방지, 규칙 기반 사고 |
-| STEP 4 | Why #3 (TDD) | 통제 대상·불변·입출력 계약을 먼저 고정 |
-| STEP 5 | 진짜 문제 정의 | **판정 중심**, 제시는 선택 |
-
-자세한 논의·표·다이어그램은 [문제 인식 보고서](Report/01.%20MagicSquare_ProblemRecognition_Report.md)를 참고하세요.
-
----
-
-## 훈련하려는 사고 능력
-
-1. **규칙 명시화** — “마방진”을 검사 가능한 조건 목록으로 분해  
-2. **불변량 인식** — “합이 같다”와 “합 = 34”를 함께 다룸  
-3. **판정과 생성의 분리** — 확인과 획득을 다른 책임으로 봄  
-4. **계약적 입출력 사고** — 무엇을 넣으면 무엇이 나와야 하는지 합의  
-5. **검증 우선·회귀 의식** — 의미를 먼저 고정하고 변경 시 깨지지 않게 유지  
-
----
-
-## 디렉터리 구조
-
-```
-MagicSquare_xx/
-├── README.md                 # 이 파일 (프로젝트 개요)
-├── Report/
-│   ├── 01. MagicSquare_ProblemRecognition_Report.md      # STEP 1~5 문제 인식
-│   └── 02. MagicSquare_Architecture_Contracts_Report.md  # Domain/UI/Data·통합 설계
-└── Prompting/
-    ├── 01. MagicSquare_ProblemRecognition_Transcript.md   # STEP 1~5 대화 Transcript
-    └── 02. MagicSquare_Full_Conversation_Transcript.md    # 전체 세션 통합 Transcript
-```
-
----
-
-## 권장 다음 단계
-
-보고서 범위를 넘어서는 작업이며, 아직 확정되지 않았습니다.
-
-1. **범위 한 줄 확정** — 판정만 / 제시 포함 / 부분 격자 포함 여부  
-2. **요구 명세** — 입력·출력·성공·실패 조건 문서화  
-3. **테스트 목록** — Invariant(I1~I7)에 대응하는 검증 시나리오  
-4. **구현** — TDD 등 선택한 방식으로 진행  
-
----
-
 ## 문서
 
 | 문서 | 설명 |
 |------|------|
-| [01. MagicSquare_ProblemRecognition_Report.md](Report/01.%20MagicSquare_ProblemRecognition_Report.md) | STEP 1~5 통합 보고서 (구현·알고리즘 미포함) |
-| [02. MagicSquare_Architecture_Contracts_Report.md](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) | Dual-Track TDD / Clean Architecture 설계·계약·테스트·통합 (구현 코드 미포함) |
-| [07. MagicSquare_PRD_Report.md](Report/07.%20MagicSquare_PRD_Report.md) | 구현 전 PRD — 계약·불변식·Dual-Track TDD·Traceability (구현 코드 미포함) |
-| [08. MagicSquare_PRD_Review_Report.md](Report/08.%20MagicSquare_PRD_Review_Report.md) | PRD 7기준 검토 — 누락·모순·모호함 및 P0 백로그 (수정본 미포함) |
-| [02. MagicSquare_Full_Conversation_Transcript.md](Prompting/02.%20MagicSquare_Full_Conversation_Transcript.md) | 지금까지 User 프롬프트·대화 흐름 Export (통합 Transcript) |
-| [07. MagicSquare_PRD_Transcript.md](Prompting/07.%20MagicSquare_PRD_Transcript.md) | PRD 분석·작성 세션 Transcript Export |
-| [08. MagicSquare_PRD_Review_Transcript.md](Prompting/08.%20MagicSquare_PRD_Review_Transcript.md) | PRD 검토 세션 Transcript Export |
+| [01. MagicSquare_ProblemRecognition_Report.md](Report/01.%20MagicSquare_ProblemRecognition_Report.md) | STEP 1~5 통합 보고서 |
+| [01.problem-definition.md](Report/01.problem-definition.md) | 문제 정의 보고서 (원격 spec 이력) |
+| [02.design.md](Report/02.design.md) | STEP 6 TDD 설계 문서 |
+| [02. MagicSquare_Architecture_Contracts_Report.md](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) | Dual-Track TDD / Clean Architecture 설계·계약 |
+| [07. MagicSquare_PRD_Report.md](Report/07.%20MagicSquare_PRD_Report.md) | 구현 전 PRD |
+| [08. MagicSquare_PRD_Review_Report.md](Report/08.%20MagicSquare_PRD_Review_Report.md) | PRD 7기준 검토 |
 
 ---
 
