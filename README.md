@@ -280,9 +280,12 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### G-02 — R2 (1/2): D-LOC-01, D-MIS-01
 
-- [ ] `find_blank_coords(G1)` → 1-index `(2,2)`, `(3,3)`
-- [ ] `find_not_exist_nums(G1)` → `(7, 10)` 오름차순
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `D-LOC-01`, `D-MIS-01`
+
+- [x] `find_blank_coords(G1)` → 1-index `(2,2)`, `(3,3)`
+- [x] `find_not_exist_nums(G1)` → `(7, 10)` 오름차순
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_loc_01_* tests/entity/test_d_mis_01_* -v` → **2 passed**
+- [x] git 커밋: `feat(green): D-LOC-01 D-MIS-01 blank coords and missing numbers`
 
 ### G-03 — R2 (2/2): D-VAL-01 ~ D-VAL-06
 
@@ -413,7 +416,8 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | **R1** AC-FR-01-01 RED (25건) | ✅ 기착수 |
 | **R2~R4** `D-*` / `U-*` RED | 🔄 스텁(`pytest.fail`) — assertion RED 전환·커밋 대기 |
 | **G-01** AC-FR-01-01 GREEN | 🔄 진행 중 (`None`/`[]`·`ErrorResponse` 통과, size·격리 **8건** FAIL) |
-| **pytest** (전체) | 21 passed · 32 failed · 53 collected |
+| **G-02** D-LOC-01, D-MIS-01 GREEN | ✅ **2 passed** |
+| **pytest** (전체) | 23 passed · 30 failed · 53 collected |
 | **REFACTOR** | ❌ GREEN 완료 후 (§7.2 Phase 마무리) |
 
 ### 다음 단계 (즉시)
