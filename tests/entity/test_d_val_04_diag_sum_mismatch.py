@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
+from copy import deepcopy
 
-# from src.entity.services.magic_square_validator import is_magic_square
+from src.entity.services.magic_square_validator import is_magic_square
+from tests.conftest import G0
 
 
 class TestDVal04DiagSumMismatch:
@@ -12,8 +13,12 @@ class TestDVal04DiagSumMismatch:
 
     def test_d_val_04_is_magic_square_diag_sum_mismatch_false(self) -> None:
         """D-VAL-04 — G0 variant with diagonal sum ≠ 34 returns False."""
-        # Given: G0 copy with main or anti-diagonal sum altered to ≠ 34
+        # Given: G0 copy with main diagonal sum altered to ≠ 34
+        grid = deepcopy(G0)
+        grid[0][0] = 17
+
         # When: is_magic_square(grid)
-        pytest.fail(
-            "RED: D-VAL-04 — diagonal sum mismatch on G0 variant returns False"
-        )
+        result = is_magic_square(grid)
+
+        # Then: validation returns False
+        assert result is False

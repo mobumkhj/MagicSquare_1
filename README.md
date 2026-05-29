@@ -11,7 +11,8 @@
 
 **이 프로젝트는 4×4 Magic Square를 "풀어내는 알고리즘"이 아니라, 불변식 기반 사고와 입력/출력 계약을 구현 전에 고정하고, Dual-Track TDD로 검증하는 TDD 훈련을 시작합니다.**
 
-현재 단계는 **PRD 기반 TDD 시작 준비 단계**입니다. 요구사항·시나리오·추적 구조는 문서로 확정되었으며, **구현 코드와 테스트 코드는 아직 작성하지 않습니다.**
+현재 단계는 **Dual-Track RED 확정 · GREEN 단계 진행 중**입니다.  
+`AC-FR-01-01` Boundary RED(25건)는 기착수되었고, FR-01~FR-05 확장 RED(`U-*`, `D-*`)와 **최소 Boundary GREEN**(`InputValidator` `None`/`[]` 분기)이 진행 중입니다.
 
 ### RED의 의미
 
@@ -85,7 +86,7 @@ Scenario → Acceptance Criteria → RED Test ID → Test Skeleton
 
 | 조건 | 코드 | 메시지 |
 |------|------|--------|
-| 4×4 아님 | `INVALID_SIZE` | `Matrix must be 4x4.` |
+| 4×4 아님 | `INVALID_SIZE` | `Grid must be 4x4.` (AC-FR-01-01 테스트 계약; PRD §13은 `Matrix must be 4x4.` — [defect_list.md](defect_list.md) DEF-006) |
 | 빈칸 ≠ 2 | `INVALID_EMPTY_COUNT` | `Exactly 2 empty cells (0) are required.` |
 | 범위 위반 | `INVALID_VALUE_RANGE` | `Each cell must be 0 or an integer from 1 to 16.` |
 | 중복 | `INVALID_DUPLICATE` | `Non-zero values must not duplicate.` |
@@ -199,50 +200,210 @@ Scenario
 
 ## 7. RED Start Checklist
 
-RED 단계 착수 전, 아래 항목을 모두 확인합니다.
+RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 추적은 §7.1·§7.2를 SSOT로 사용합니다.**
 
-- [ ] 모든 Scenario가 정의되었는가?
-- [ ] 모든 Acceptance Criteria가 테스트 가능한 문장인가?
-- [ ] 모든 Scenario에 RED Test ID가 부여되었는가?
-- [ ] 모든 RED Test ID에 Test Skeleton 후보가 있는가?
-- [ ] 각 RED 항목에 Expected RED Failure가 명시되었는가?
-- [ ] 각 RED 실패에 대응하는 GREEN Task 후보가 있는가?
-- [ ] Boundary RED와 Logic RED가 분리되었는가?
-- [ ] ECB Layer가 명확히 지정되었는가?
-- [ ] 아직 구현 코드를 작성하지 않았는가?
-- [ ] 아직 테스트 코드를 작성하지 않았는가?
-- [ ] 아직 REFACTOR를 수행하지 않았는가?
+- [x] 모든 Scenario가 정의되었는가?
+- [x] 모든 Acceptance Criteria가 테스트 가능한 문장인가?
+- [x] Dual-Track RED Test ID (`RED-BND-*`, `D-*`, `U-*`)가 부여되었는가?
+- [x] R1 Test Skeleton 작성 완료 (`test_ac_fr_01_01_*.py` 25건)
+- [x] R2~R4: `pytest.fail` 스텁 → assertion RED 전환 (§7.1)
+- [x] Boundary RED와 Logic RED가 분리되었는가? (Track A mock / Track B Domain Mock 금지)
+- [x] ECB Layer가 명확히 지정되었는가?
+- [x] RED 확인 없이 GREEN 확장 금지 — G-01~G-07 GREEN 완료
+- [x] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리 · 백로그 확정)
+
+---
+
+## 7.1 RED 커밋 체크리스트 (Dual-Track)
+
+> 각 RED 커밋 후 `pytest`로 **의도적 RED**를 확인한 뒤에만 GREEN으로 진행합니다.  
+> 상세 설계: [Report/13 FR-01~FR-05 Dual-Track RED](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) · [docs/test_plan.md](docs/test_plan.md)
+
+| 커밋 | 포함 Test ID | 파일 | 건수 |
+|------|--------------|------|:----:|
+| **R1** | `AC-FR-01-01` / `RED-BND-001`·`002`·`006` | `tests/boundary/test_ac_fr_01_01_*.py`, `conftest.py` | 25 |
+| **R2** | `D-LOC-01` ~ `D-VAL-06` | `tests/entity/test_d_loc_01_*.py` … `test_d_val_06_*.py` | 8 |
+| **R3** | `D-SOL-01` ~ `D-SOL-04` | `tests/entity/test_d_sol_01_*.py` … `test_d_sol_04_*.py` | 4 |
+| **R4** | `U-FLOW-02` ~ `U-OUT-03` | `tests/boundary/test_u_*.py` | 12 |
+| **R5** (선택) | `U-IN-01` ~ `U-IN-03` | 신규 `tests/boundary/test_u_in_0*.py` | 4 |
+
+### R1 — AC-FR-01-01 (기착수)
+
+- [x] R1 테스트·fixture 작성 (`test_ac_fr_01_01_*.py`, `conftest.py`)
+- [ ] R1 RED 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v`
+- [ ] R1 git 커밋: `test(red): AC-FR-01-01 boundary RED — 25 cases`
+
+### R2 — Entity D-LOC / D-MIS / D-VAL
+
+- [ ] `pytest.fail` 스텁 → Given-When-Then + assertion RED로 교체
+- [ ] R2 RED 확인: `python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_mis_01_*.py tests/entity/test_d_val_*.py -v`
+- [ ] R2 git 커밋: `test(red): entity D-LOC/D-MIS/D-VAL RED — 8 cases`
+
+### R3 — D-SOL (Control/Entity)
+
+- [ ] G2/G3 격자 픽스처 SSOT 고정 후 assertion RED 작성
+- [ ] R3 RED 확인: `python -m pytest tests/entity/test_d_sol_*.py -v`
+- [ ] R3 git 커밋: `test(red): entity/control D-SOL RED — 4 cases`
+
+### R4 — Boundary U-FLOW / U-IN / U-OUT
+
+- [ ] `pytest.fail` 스텁 → assertion RED로 교체 (U-OUT는 UseCase mock/spy)
+- [ ] R4 RED 확인: `python -m pytest tests/boundary/test_u_*.py -v`
+- [ ] R4 git 커밋: `test(red): boundary U-FLOW/U-IN/U-OUT RED — 12 cases`
+
+### R5 (선택) — U-IN-01 ~ U-IN-03
+
+- [ ] `INVALID_SIZE` vs E00x envelope 매핑 결정
+- [ ] 신규 RED 4건 작성·RED 확인·커밋
+
+---
+
+## 7.2 GREEN 단계 Todo List
+
+> RED 묶음과 1:1이 아닌 **의존성 순서**입니다. GREEN 단계에서 **리팩터링·테스트 약화·skip 금지**.
+
+### Phase 0 — 공통
+
+- [ ] `python -m pytest tests/ -q` 기준선 기록
+- [ ] ECB `boundary → control → entity` 역의존 없음 확인
+
+### G-01 — R1 대응: AC-FR-01-01 완료
+
+**Test ID:** `RED-BND-001`, `RED-BND-002`, `RED-BND-006`
+
+- [x] `None` / `[]` → `INVALID_SIZE` + `Grid must be 4x4.`
+- [x] `_is_valid_size()`: `[[]]*4`, 3×4, 4×3, 5×5 → `INVALID_SIZE`
+- [x] `FailureResponse` ↔ 테스트 `ErrorResponse` 계약 정합
+- [x] `PuzzleBoundary.submit`: invalid 시 `execute` 0회 early return
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v` → **25 passed**
+- [ ] git 커밋: `feat(green): AC-FR-01-01 size validation and boundary isolation`
+
+### G-02 — R2 (1/2): D-LOC-01, D-MIS-01
+
+**Test ID:** `D-LOC-01`, `D-MIS-01`
+
+- [x] `find_blank_coords(G1)` → 1-index `(2,2)`, `(3,3)`
+- [x] `find_not_exist_nums(G1)` → `(7, 10)` 오름차순
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_loc_01_* tests/entity/test_d_mis_01_* -v` → **2 passed**
+- [x] git 커밋: `feat(green): D-LOC-01 D-MIS-01 blank coords and missing numbers`
+
+### G-03 — R2 (2/2): D-VAL-01 ~ D-VAL-06
+
+**Test ID:** `D-VAL-01` ~ `D-VAL-06`
+
+- [x] `MagicConstant` = 34 · `is_magic_square` 행/열/대각/집합/0 금지
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_val_*.py -v` → **6 passed**
+- [ ] git 커밋: `feat(green): D-VAL-01~06 magic square validation`
+
+### G-04 — R3: D-SOL-01 ~ D-SOL-04
+
+**Test ID:** `D-SOL-01` ~ `D-SOL-04`
+
+- [x] G1 solution · G2 reverse · G3 `UnsolvableDomainError` · 출력 shape
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_sol_*.py -v` → **4 passed**
+- [ ] git 커밋: `feat(green): D-SOL-01~04 two-blank solver`
+
+### G-05 — R4 (1/2): U-IN-04 ~ U-IN-08 (+ R5 시 U-IN-01~03)
+
+**Test ID:** `U-IN-04` ~ `U-IN-08`
+
+- [x] short-circuit: size → empty → range → duplicate (E002/E004/E005 envelope)
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_in_*.py -v` → **5 passed**
+- [ ] git 커밋: `feat(green): U-IN-04~08 input validation short-circuit`
+
+### G-06 — R4 (2/2): U-FLOW-02 (a~d)
+
+**Test ID:** `U-FLOW-02`
+
+- [x] invalid 유형별 `execute.call_count == 0`
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_flow_02_*.py -v` → **4 passed**
+- [ ] git 커밋: `feat(green): U-FLOW-02 invalid never calls execute`
+
+### G-07 — R4 (3/3): U-OUT-01 ~ U-OUT-03
+
+**Test ID:** `U-OUT-01` ~ `U-OUT-03`
+
+- [x] G1 + UseCase mock → len=6, 1-index coords, `n1≠n2`
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_out_*.py -v` → **3 passed**
+- [ ] git 커밋: `feat(green): U-OUT-01~03 solve output contract`
+
+### Phase 마무리
+
+- [x] 전체: `python -m pytest tests/ -v` → **53 passed** (R5 제외 시 49)
+- [x] Boundary 커버리지 ≥ 85%: `pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85` → **100%**
+- [x] REFACTOR 백로그 분리 (G-* 커밋과 분리) — 아래 표, `refactor/*` 브랜치 전용
+
+#### REFACTOR 백로그 (`refactor/*` — GREEN 커밋과 분리)
+
+| 우선 | 후보 | 레이어 | 비고 |
+|:----:|------|--------|------|
+| R-01 | `ErrorCode` Enum + `ERROR_MESSAGES` / E001↔`INVALID_SIZE` SSOT 통합 | Boundary | AC-FR-01-01 vs U-IN envelope |
+| R-02 | `FailureResponse` ↔ `ErrorResponse` 단일 모델 정리 | Boundary | dataclass vs pydantic |
+| R-03 | `BlankFinder` / `CellPosition` VO 분리 | Entity | `find_blank_coords` |
+| R-04 | `MissingNumbers(small, large)` dataclass | Entity | `find_not_exist_nums` |
+| R-05 | `MagicSquareValidator` 행/열/대각 private 헬퍼 추출 | Entity | `is_magic_square` |
+| R-06 | `TwoAssignmentTrial` / `SolutionOrderResolver` | Control | `solver.py` |
+| R-07 | `Solution6` dataclass + `to_list()` | Boundary/Control | U-OUT envelope |
+| R-08 | G1 D-SOL-01 기대값 SSOT 정합 (`[2,2,7,3,3,10]` vs 도메인) | Test/Design | Report/13·수학 검증 |
+
+
+### RED → GREEN 매핑
+
+| RED | 건수 | GREEN |
+|-----|:----:|-------|
+| R1 | 25 | G-01 |
+| R2 | 8 | G-02, G-03 |
+| R3 | 4 | G-04 |
+| R4 | 12 | G-05, G-06, G-07 |
+| R5 (선택) | 4 | G-05에 병합 |
+
+**권장 진행:** `R1✓ → G-01 → R2 → G-02 → G-03 → R3 → G-04 → R4 → G-05 → G-06 → G-07 → (R5) → 마무리`
+
+### AC-FR-01-01 Track A (R1 세부 — [docs/test_plan.md](docs/test_plan.md))
+
+- [x] TC-A-01: `grid=None` → 실패 결과 반환
+- [x] TC-A-02: `code == "INVALID_SIZE"`
+- [x] TC-A-03: `message == "Grid must be 4x4."`
+- [x] TC-A-04: `grid=None` 시 `execute` 0회 (mock/spy)
+- [x] TC-A-05: `grid=[]` → `INVALID_SIZE`
+- [x] TC-A-06: 3×4·4×3·5×5·`[[]]*4` → `INVALID_SIZE` (GREEN G-01)
+- [x] TC-A-07: 반환 타입 계약 (`FailureResponse` / `ErrorResponse` 정합)
+
+### 커버리지 · 결함
+
+- [ ] Domain Logic: 95%+ (`pytest-cov`) — 현재 entity+control **~89%**
+- [x] Boundary Layer: 85%+ — **100%** (`tests/boundary/ --cov=src/boundary`)
+- [ ] 전체 TOTAL: 90%+
+- [x] [defect_list.md](defect_list.md) 생성 (DEF-001~006, 2026-05-29)
+- [x] 모든 결함 수정 후 회귀 테스트 통과 — **53 passed**
 
 ---
 
 ## RED 단계 To-Do 리스트
 
-> 이 체크리스트는 test_plan.md 기반으로 생성되었습니다.
-> 각 항목은 RED(실패 테스트 작성) 완료 시 체크합니다.
+### Golden Master 회귀 안전장치
 
-### Track A — UI / Boundary 테스트
-- [ ] TC-A-01: grid=None 입력 → 실패 결과 반환 (Happy Path of Failure)
-- [ ] TC-A-02: code가 정확히 "INVALID_SIZE" 문자열인지 검증
-- [ ] TC-A-03: message가 "Grid must be 4x4." 와 문자 단위 동일한지 검증
-- [ ] TC-A-04: grid=None 시 Domain 진입점 0회 호출 (mock/spy 검증)
-- [ ] TC-A-05: grid=[] 빈 리스트 → 실패 결과 반환
-- [ ] TC-A-06: grid=3×4 크기 불일치 → 실패 결과 반환
-- [ ] TC-A-07: 반환 객체 타입이 지정 실패 결과 구조체인지 검증
+Refactoring 시작 전 구축.  
+GREEN 완료 후 즉시 적용.
 
-### Track B — Domain / Logic 테스트
-- [ ] TC-B-01: resolve()가 None grid를 직접 받지 않음을 격리 검증
-- [ ] TC-B-02: Boundary가 None 분기를 처리 후 resolve() 미호출 확인
-- [ ] TC-B-03: resolve() mock이 호출됐을 경우 테스트 실패 처리
-- [ ] TC-B-04: AC-FR-01-02~05 범위의 케이스는 이 커밋에 포함하지 않음 확인
+#### 기준 파일 생성
 
-### 커버리지 목표
-- [ ] Domain Logic: 95%+ (pip install pytest-cov)
-- [ ] Boundary Layer: 85%+
-- [ ] 전체 TOTAL: 90%+
+- [x] **GM-01**: `golden_master_expected.txt` 생성
+- [x] **GM-02**: 정상/역순/오류 시나리오 추가
+- [x] **GM-03**: `git add tests/golden_master_expected.txt`
 
-### 결함 목록 연결
-- [x] defect_list.md 생성 및 발견 결함 기록 — [defect_list.md](defect_list.md) (DEF-001~006, 2026-05-29)
-- [ ] 모든 결함 수정 후 회귀 테스트 통과 확인
+#### 테스트 코드
+
+- [x] **GM-04**: `test_golden_master_magic_square` 작성
+- [x] **GM-05**: approve 패턴 적용
+- [x] **GM-06**: Golden Master 테스트 PASS 확인 — `pytest -m golden_master -v` → **6 passed**
+
+#### 회귀 보호
+
+- [x] **GM-07**: row-major 규칙 보호
+- [x] **GM-08**: 1-index 출력 보호
+- [x] **GM-09**: reverse 조합 fallback 보호
+- [x] **GM-10**: Error Contract 보호
 
 ---
 
@@ -277,6 +438,12 @@ RED 단계 착수 전, 아래 항목을 모두 확인합니다.
 | [Report/06. Level1-5 Scenario Verification](Report/06.%20MagicSquare_Level1-5_Scenario_Verification_Report.md) | Epic → User Story → Scenario → AC 연결 일관성 검증 |
 | [Report/02. Architecture & Contracts](Report/02.%20MagicSquare_Architecture_Contracts_Report.md) | 입력/출력 계약, Domain Invariant(I1~I8), Layer Boundary |
 | [Report/02.design.md](Report/02.design.md) | 불변 조건별 RED/GREEN 테스트 케이스, TDD 실행 순서 |
+| [Report/10. AC-FR-01-01 RED QA](Report/10.%20MagicSquare_AC_FR_01_01_RED_QA_Report.md) | AC-FR-01-01 RED 25건·실행 결과·GREEN 제안 |
+| [Report/13. FR-01~FR-05 Dual-Track RED](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) | `U-*` / `D-*` SSOT 21건 RED 설계표 |
+| [Report/16. RED/GREEN Todo & README](Report/16.%20MagicSquare_RED_GREEN_TodoList_README_Update_Report.md) | R1~R5 · G-01~G-07 체크리스트 · SSOT ID 오름차순 · README 갱신 |
+| [docs/test_plan.md](docs/test_plan.md) | AC-FR-01-01 테스트 계획·경계값·실행 순서 |
+| [defect_list.md](defect_list.md) | RED 단계 결함 추적 (DEF-001~006) |
+| [Prompting/16. RED/GREEN Todo Transcript](Prompting/16.%20MagicSquare_RED_GREEN_TodoList_README_Update_Transcript.md) | 본 세션 Turn 1~4 대화 Export |
 | [Report/03. User Entity ECB/TDD](Report/03.%20MagicSquare_UserEntity_ECB_TDD_Report.md) | ECB entity TDD 적용 사례(User) |
 | [Report/04. CursorRules Extension](Report/04.%20MagicSquare_CursorRules_Extension_Report.md) | `.cursorrules` → `.cursor/rules/*.mdc` 분리 구성 |
 | [Report/01. Problem Recognition](Report/01.%20MagicSquare_ProblemRecognition_Report.md) | 문제 인식·불변식 정의 |
@@ -302,34 +469,52 @@ RED 단계 착수 전, 아래 항목을 모두 확인합니다.
 | 문제 인식 (STEP 1~5) | ✅ 완료 |
 | STEP 6 TDD 설계 | ✅ 완료 |
 | 아키텍처·계약·PRD | ✅ 완료 |
-| TDD To-Do List · README | ✅ 완료 |
-| **현재 단계** | PRD 기반 TDD 시작 준비 |
-| **구현 코드** | ❌ 아직 작성 전 |
-| **테스트 코드** | ❌ 아직 작성 전 |
-| **REFACTOR** | ❌ 아직 수행 전 (GREEN 이후 후보만 정의) |
-| 샘플 코드 | User 엔티티(ECB/TDD 예제)만 존재 |
+| FR-01~FR-05 Dual-Track RED 설계 | ✅ [Report/13](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) |
+| **R1** AC-FR-01-01 RED (25건) | ✅ 기착수 |
+| **R2~R4** `D-*` / `U-*` RED | ✅ assertion RED · GREEN 완료 |
+| **G-01** AC-FR-01-01 GREEN | ✅ **25 passed** |
+| **G-02** D-LOC-01, D-MIS-01 GREEN | ✅ **2 passed** |
+| **G-03** D-VAL-01~06 GREEN | ✅ **6 passed** |
+| **G-04** D-SOL-01~04 GREEN | ✅ **4 passed** |
+| **G-05** U-IN-04~08 GREEN | ✅ **5 passed** |
+| **G-06** U-FLOW-02 GREEN | ✅ **4 passed** |
+| **G-07** U-OUT-01~03 GREEN | ✅ **3 passed** |
+| **pytest** (전체) | **53 passed** · 0 failed · 53 collected |
+| **Boundary 커버리지** | **100%** (기준 ≥85%) |
+| **REFACTOR** | 🔄 백로그 확정 (§7.2) — `refactor/*` 착수 대기 |
 
-### 다음 단계
+### 다음 단계 (즉시)
 
-1. **RED Start Checklist**(§7) 전항목 확인
-2. §6 Tracking Board **첫 Scenario**부터 Test Skeleton 작성
-3. `pytest` 실행 → **테스트 실패 상태 확인(RED)**
-4. 해당 Scenario의 **GREEN Task Candidate**만 최소 적용
-5. 테스트 통과 확인 후 **REFACTOR Candidate** 검토 (계약 불변 유지)
+1. **G-* git 커밋** 정리 (§7.2 미커밋 항목)
+2. **REFACTOR** 착수: R-01~R-08 (`refactor/*` 브랜치, G 커밋과 분리)
+3. **R5** (선택): U-IN-01~03 RED → G-05 병합
+4. Domain 커버리지 95%+ 보강 (`solve_two_blanks_use_case` integration)
 
-### 권장 RED 시작 순서 (Dual-Track 병렬)
+### 테스트 실행
+
+```powershell
+# AC-FR-01-01만 (G-01 목표: 25 passed)
+python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v
+
+# 전체 기준선 (Phase 마무리)
+python -m pytest tests/ -v
+
+# Boundary 커버리지 게이트 (≥85%)
+python -m pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85
+
+# RED 커밋별
+python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_val_*.py -v
+python -m pytest tests/boundary/test_u_*.py -v
+```
+
+### 권장 진행 순서 (RED 커밋 → GREEN)
 
 ```
-Track A (Boundary RED)          Track B (Logic RED)
-─────────────────────          ─────────────────────
-SC-BND-001 None 입력            SC-DOM-001 row-major 빈칸
-SC-BND-002 4×4 크기             SC-DOM-002 누락 숫자
-SC-BND-003~005 검증 오류        SC-DOM-003~005 행·열·대각
-                                SC-DOM-006~008 Solver
-
-        ↓ 양 Track GREEN 완료 후 ↓
-
-Integration RED: SC-INT-001(길이 6), SC-INT-002(1-index)
+R1 (AC-FR-01-01, 25) ──▶ G-01
+R2 (D-LOC~D-VAL, 8)  ──▶ G-02, G-03
+R3 (D-SOL, 4)        ──▶ G-04
+R4 (U-*, 12)         ──▶ G-05, G-06, G-07
+R5 (U-IN-01~03, 4)   ──▶ G-05에 병합 (선택)
 ```
 
 ---
@@ -352,14 +537,24 @@ Integration RED: SC-INT-001(길이 6), SC-INT-002(1-index)
 ```
 MagicSquare_xx/
 ├── README.md
-├── .cursorrules
-├── .cursor/rules/          # ECB · TDD · 코드 스타일 규칙
-├── Report/                 # 보고서 (문제 인식 ~ TDD To-Do List)
-├── Prompting/              # 대화·프롬프트 Transcript
-├── src/                    # ECB 소스 (향후 boundary/control/entity)
-│   └── entity/             # User 엔티티 예제 (현재)
-└── tests/                  # pytest (향후 레이어별 대응)
+├── defect_list.md
+├── docs/test_plan.md
+├── .cursor/rules/              # ECB · TDD · 코드 스타일 규칙
+├── Report/                     # PRD · RED 설계 · QA 보고서
+├── src/
+│   ├── boundary/               # InputValidator, PuzzleBoundary, schemas
+│   ├── control/                # SolveTwoBlanksUseCase (스텁)
+│   └── entity/                 # user.py (예제) · 향후 BlankFinder 등
+└── tests/
+    ├── boundary/
+    │   ├── conftest.py
+    │   ├── test_ac_fr_01_01_*.py   # R1 — 25건
+    │   └── test_u_*.py             # R4 — 12건
     └── entity/
+        ├── test_user.py
+        ├── test_d_loc_01_*.py      # R2
+        ├── test_d_val_*.py         # R2
+        └── test_d_sol_*.py         # R3
 ```
 
 ---
@@ -370,4 +565,4 @@ MagicSquare_xx/
 
 ---
 
-*본 README는 구현 코드 및 테스트 코드를 포함하지 않습니다. 모든 구현은 RED 실패 상태 확인 이후에만 시작합니다.*
+*구현·테스트는 RED 실패 확인 후 GREEN 최소 코드만 추가합니다. 진행 상태는 §7.1·§7.2·§10 체크리스트를 SSOT로 갱신합니다.*
