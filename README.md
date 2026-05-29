@@ -11,8 +11,8 @@
 
 **이 프로젝트는 4×4 Magic Square를 "풀어내는 알고리즘"이 아니라, 불변식 기반 사고와 입력/출력 계약을 구현 전에 고정하고, Dual-Track TDD로 검증하는 TDD 훈련을 시작합니다.**
 
-현재 단계는 **Dual-Track RED 확정 · GREEN 단계 진행 중**입니다.  
-`AC-FR-01-01` Boundary RED(25건)는 기착수되었고, FR-01~FR-05 확장 RED(`U-*`, `D-*`)와 **최소 Boundary GREEN**(`InputValidator` `None`/`[]` 분기)이 진행 중입니다.
+현재 단계는 **G-01~G-07 GREEN 완료 · REFACTOR 단계 착수 대기**입니다.  
+Dual-Track RED(`R1~R4`, 49건)와 GREEN(`G-01~G-07`, 53 passed)이 완료되었으며, 구조 개선은 **`refactor/*` 브랜치**에서 §7.3 REFACTOR 실행 계획을 따릅니다.
 
 ### RED의 의미
 
@@ -169,8 +169,17 @@ Scenario
 | ECB Layer | Responsibility | Example Component |
 |-----------|----------------|-------------------|
 | **Entity** | Board 상태와 순수 도메인 규칙을 표현한다. 마방진 판정, 빈칸/누락 탐색 등 I/O 없는 순수 로직. UI·DB·Web·파일 시스템에 **의존하지 않는다.** | `MagicBoard`, `BlankFinder`, `MissingNumberFinder`, `MagicSquareValidator`, `MagicConstant` |
-| **Control** | Boundary와 Entity 사이에서 검증 통과 후 해 결정 **흐름을 조정**한다. 두 조합 시도 순서, UseCase 오케스트레이션. | `Solver`, `SolveTwoBlanksUseCase` |
-| **Boundary** | 입력 검증, 출력 형식, 오류 정책, Control 호출을 담당한다. Domain Invariant를 **직접 구현하지 않는다.** | `InputValidator`, `PuzzleBoundary`, `DomainErrorMapper` |
+| **Control** | Boundary와 Entity 사이에서 검증 통과 후 해 결정 **흐름을 조정**한다. 두 조합 시도 순서, UseCase 오케스트레이션. | `SolveTwoBlanksUseCase` |
+| **Boundary** | 입력 검증, 출력 형식, 오류 정책, Control 호출을 담당한다. Domain Invariant를 **직접 구현하지 않는다.** | `InputValidator`, `PuzzleBoundary`, `ErrorResponse` |
+| **Screen (Boundary 하위 UI)** | 표시·입력 수집·Presenter 경유 Boundary 호출. Control/Entity **직접 호출 금지**. | `MainWindow`, `PuzzlePresenter`, `grid_adapter` |
+
+#### 프롬프트 ↔ 실제 파일 매핑 (Concept-to-Code)
+
+| 프롬프트 (훈련 자료) | 실제 파일 | ECB Layer |
+|---------------------|-----------|-----------|
+| `domain.py` | `src/control/solver.py`, `src/control/solve_two_blanks_use_case.py` | Control *(solver 알고리즘은 R-06에서 Entity로 이동 예정)* |
+| `boundary.py` | `src/boundary/puzzle_boundary.py`, `src/boundary/input_validator.py`, `src/boundary/schemas.py` | Boundary |
+| `gui/main_window.py` | `src/boundary/screen/main_window.py` | Screen |
 
 ---
 
@@ -188,9 +197,9 @@ Scenario
 | - [ ] | SC-DOM-003 | 모든 행 합 34 검증 | 4행 각 합 = 34 → true, 하나라도 ≠34 → false | RED-DOM-003 | `tests/entity/test_magic_square_validator.py::test_validate_row_sums_all_34_returns_true` | 행 합 검증 함수 없음 → boolean assertion 실패 | 4행 `sum(row) == MAGIC_CONSTANT` 비교 최소 구현 | `_check_row_sums(grid) -> bool` private 메서드 추출 | Entity | `MagicSquareValidator` |
 | - [ ] | SC-DOM-004 | 모든 열 합 34 검증 | 4열 각 합 = 34 → true, 하나라도 ≠34 → false | RED-DOM-004 | `tests/entity/test_magic_square_validator.py::test_validate_col_sums_all_34_returns_true` | 열 합 검증 없음 → boolean assertion 실패 | 열별 합산 후 `MAGIC_CONSTANT` 비교 최소 구현 | 행/열 합 공통 `_sum_lines()` 헬퍼 추출 | Entity | `MagicSquareValidator` |
 | - [ ] | SC-DOM-005 | 두 대각선 합 34 검증 | 주·반대각 합 = 34 → true, 하나라도 ≠34 → false | RED-DOM-005 | `tests/entity/test_magic_square_validator.py::test_validate_diag_sums_all_34_returns_true` | 대각선 합 검증 없음 → boolean assertion 실패 | `grid[i][i]`, `grid[i][3-i]` 합 비교 최소 구현 | `MagicConstant` Value Object로 34 캡슐화 | Entity | `MagicSquareValidator`, `MagicConstant` |
-| - [ ] | SC-DOM-006 | small-first 성공 | Attempt1(small→first, large→second) 성공 시 `[r1,c1,small,r2,c2,large]` 반환 | RED-DOM-006 | `tests/control/test_solve_two_blanks_use_case.py::test_solve_small_first_attempt_succeeds_returns_correct_order` | `Solver`/`UseCase` 미구현 → 결과 배열 assertion 실패 | BlankFinder + MissingNumberFinder + Validator 조합 Attempt1 시도·성공 반환 | `TwoAssignmentTrial` Domain Service로 조합 생성 분리 | Control | `Solver`, `SolveTwoBlanksUseCase` |
-| - [ ] | SC-DOM-007 | small-first 실패 후 reverse 성공 | Attempt1 실패 → Attempt2(large→first, small→second) 성공 시 `n1=large, n2=small` | RED-DOM-007 | `tests/control/test_solve_two_blanks_use_case.py::test_solve_reverse_attempt_succeeds_after_small_first_fails` | reverse 시도 분기 없음 → `n1 > n2` 기대 assertion 실패 | Attempt1 false 시 Attempt2 실행 후 성공 결과 반환 | `SolutionOrderResolver`로 n1/n2 순서 결정 책임 분리 | Control | `Solver`, `SolveTwoBlanksUseCase` |
-| - [ ] | SC-DOM-008 | 두 조합 모두 실패 | Attempt1·Attempt2 모두 비마방진 → `NoValidCompletion` / `DOMAIN_NO_SOLUTION` | RED-DOM-008 | `tests/control/test_solve_two_blanks_use_case.py::test_solve_both_attempts_fail_raises_no_valid_completion` | 실패 정책 미구현 → 예외 미발생 또는 잘못된 성공 반환 | 양쪽 판정 false 시 `NoValidCompletion` 반환/발생 최소 구현 | Domain 실패 Result vs 예외 1종 통일 | Control | `Solver`, `NoValidCompletion` |
+| - [x] | SC-DOM-006 | small-first 성공 | Attempt1(small→first, large→second) 성공 시 `[r1,c1,small,r2,c2,large]` 반환 | RED-DOM-006 | `tests/entity/test_d_sol_01_*.py` *(→ `tests/control/` 이동 예정)* | — | BlankFinder + MissingNumberFinder + Validator 조합 Attempt1 시도·성공 반환 | `solver.py` → `entity/services/two_cell_solver.py` (R-06) | Control/Entity | `two_cell_solver`, `SolveTwoBlanksUseCase` |
+| - [x] | SC-DOM-007 | small-first 실패 후 reverse 성공 | Attempt1 실패 → Attempt2(large→first, small→second) 성공 시 `n1=large, n2=small` | RED-DOM-007 | `tests/entity/test_d_sol_02_*.py` *(→ `tests/control/` 이동 예정)* | — | Attempt1 false 시 Attempt2 실행 후 성공 결과 반환 | `SolutionOrderResolver`로 n1/n2 순서 결정 책임 분리 (R-06) | Control/Entity | `two_cell_solver`, `SolveTwoBlanksUseCase` |
+| - [x] | SC-DOM-008 | 두 조합 모두 실패 | Attempt1·Attempt2 모두 비마방진 → `UnsolvableDomainError` / `DOMAIN_NO_SOLUTION` | RED-DOM-008 | `tests/entity/test_d_sol_03_*.py` *(→ `tests/control/` 이동 예정)* | — | 양쪽 판정 false 시 `UnsolvableDomainError` → boundary `DOMAIN_NO_SOLUTION` | Domain 실패 Result vs 예외 1종 통일 | Control/Entity | `two_cell_solver`, `PuzzleBoundary` |
 | - [ ] | SC-INT-001 | 결과 배열 길이 6 | 성공 응답 `result` 길이 = 6, `[r1,c1,n1,r2,c2,n2]` 형식 | RED-INT-001 | `tests/boundary/test_puzzle_boundary.py::test_submit_valid_puzzle_returns_result_length_six` | end-to-end `submit()` 미구현 → `len(result) == 6` assertion 실패 | Boundary→Control→Entity 연결 후 6원소 list 반환 | `Solution6` dataclass + `to_list()` 변환기 추출 | Boundary | `PuzzleBoundary`, `ResultFormatter` |
 | - [ ] | SC-INT-002 | 반환 좌표 1-index | `r1,c1,r2,c2` 모두 1~4 범위, 0-index 변환 없이 1-index 유지 | RED-INT-002 | `tests/boundary/test_puzzle_boundary.py::test_submit_valid_puzzle_returns_1_indexed_coordinates` | 0-index 반환 또는 미구현 → 좌표 범위 assertion 실패 | BlankFinder 1-index 좌표를 출력에 그대로 전달 | 내부 0-index / 외부 1-index 변환을 Boundary에서만 처리 | Boundary | `PuzzleBoundary`, `BlankFinder` |
 
@@ -210,7 +219,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 - [x] Boundary RED와 Logic RED가 분리되었는가? (Track A mock / Track B Domain Mock 금지)
 - [x] ECB Layer가 명확히 지정되었는가?
 - [x] RED 확인 없이 GREEN 확장 금지 — G-01~G-07 GREEN 완료
-- [x] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리 · 백로그 확정)
+- [x] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리 · §7.3 실행 계획)
 
 ---
 
@@ -235,20 +244,20 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### R2 — Entity D-LOC / D-MIS / D-VAL
 
-- [ ] `pytest.fail` 스텁 → Given-When-Then + assertion RED로 교체
-- [ ] R2 RED 확인: `python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_mis_01_*.py tests/entity/test_d_val_*.py -v`
+- [x] `pytest.fail` 스텁 → Given-When-Then + assertion RED로 교체
+- [x] R2 RED 확인: `python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_mis_01_*.py tests/entity/test_d_val_*.py -v` → **8 passed**
 - [ ] R2 git 커밋: `test(red): entity D-LOC/D-MIS/D-VAL RED — 8 cases`
 
 ### R3 — D-SOL (Control/Entity)
 
-- [ ] G2/G3 격자 픽스처 SSOT 고정 후 assertion RED 작성
-- [ ] R3 RED 확인: `python -m pytest tests/entity/test_d_sol_*.py -v`
+- [x] G2/G3 격자 픽스처 SSOT 고정 후 assertion RED 작성
+- [x] R3 RED 확인: `python -m pytest tests/entity/test_d_sol_*.py -v` → **4 passed**
 - [ ] R3 git 커밋: `test(red): entity/control D-SOL RED — 4 cases`
 
 ### R4 — Boundary U-FLOW / U-IN / U-OUT
 
-- [ ] `pytest.fail` 스텁 → assertion RED로 교체 (U-OUT는 UseCase mock/spy)
-- [ ] R4 RED 확인: `python -m pytest tests/boundary/test_u_*.py -v`
+- [x] `pytest.fail` 스텁 → assertion RED로 교체 (U-OUT는 UseCase mock/spy)
+- [x] R4 RED 확인: `python -m pytest tests/boundary/test_u_*.py -v` → **12 passed**
 - [ ] R4 git 커밋: `test(red): boundary U-FLOW/U-IN/U-OUT RED — 12 cases`
 
 ### R5 (선택) — U-IN-01 ~ U-IN-03
@@ -264,8 +273,8 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### Phase 0 — 공통
 
-- [ ] `python -m pytest tests/ -q` 기준선 기록
-- [ ] ECB `boundary → control → entity` 역의존 없음 확인
+- [x] `python -m pytest tests/ -q` 기준선 기록 → **53 passed**
+- [x] ECB `boundary → control → entity` 역의존 없음 확인
 
 ### G-01 — R1 대응: AC-FR-01-01 완료
 
@@ -342,10 +351,88 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | R-03 | `BlankFinder` / `CellPosition` VO 분리 | Entity | `find_blank_coords` |
 | R-04 | `MissingNumbers(small, large)` dataclass | Entity | `find_not_exist_nums` |
 | R-05 | `MagicSquareValidator` 행/열/대각 private 헬퍼 추출 | Entity | `is_magic_square` |
-| R-06 | `TwoAssignmentTrial` / `SolutionOrderResolver` | Control | `solver.py` |
-| R-07 | `Solution6` dataclass + `to_list()` | Boundary/Control | U-OUT envelope |
+| R-06 | `solver.py` → `entity/services/two_cell_solver.py` | Entity/Control | Step A/B·int[6] 조립 Entity 이동; UseCase는 오케스트레이션만 |
+| R-07 | `Solution6` dataclass + `to_list()` | Boundary/Control | U-OUT envelope; `PuzzleBoundary` typed return |
 | R-08 | G1 D-SOL-01 기대값 SSOT 정합 (`[2,2,7,3,3,10]` vs 도메인) | Test/Design | Report/13·수학 검증 |
 
+---
+
+## 7.3 REFACTOR 실행 계획 (`refactor/*` 브랜치)
+
+> **`.cursorrules` refactor_phase:** 기능·계약 불변, 테스트·커버리지 유지, 테스트 삭제/약화/skip 금지.  
+> G-* GREEN 커밋과 **분리**하여 진행합니다.
+
+### 리팩토링 대상 목록 (우선순위 순)
+
+| 순번 | 대상 파일 | 문제 | 적용 기법 | 우선순위 |
+|:----:|-----------|------|-----------|:--------:|
+| 0 | `tests/control/` *(신규)* | control 레이어 전용 테스트 공백; `test_d_sol_*`가 entity에서 `control.solver` 직접 import | Characterization Test 선행 | **P0** |
+| 1 | `src/control/solver.py` | Step A/B·deepcopy·int[6]·`UnsolvableDomainError`가 Control에 위치 | Move Method/Class → `entity/services/two_cell_solver.py` (R-06) | **P0** |
+| 2 | `src/control/solve_two_blanks_use_case.py` | `execute()`가 domain-heavy `solution()`에 1줄 위임 | Replace Delegation — entity solver만 호출 (R-06) | **P0** |
+| 3 | `src/boundary/schemas.py` | `E001_*` vs `INVALID_SIZE_*` 이중 SSOT | Replace Type Code with Enum (R-01) | **P0** |
+| 4 | `src/boundary/schemas.py` + `error_response.py` | `FailureResponse` dead vs pydantic `ErrorResponse` | Unify Interfaces (R-02) | **P0** |
+| 5 | `src/boundary/puzzle_boundary.py` | 검증+위임+예외→envelope 혼재; `ErrorResponse \| Any` | Extract Class + Introduce Parameter Object (R-07) | **P0** |
+| 6 | `src/boundary/input_validator.py` | 검증+`ErrorResponse` 직렬화 혼재 | Extract Method — 검증/매핑 분리 | **P0** |
+| 7 | `puzzle_presenter.py` + `result_formatter.py` | int[6] 길이 검증 없이 unpack | typed boundary outcome 후 DTO→문자열만 | **P1** |
+| 8 | `tests/entity/test_d_sol_*.py` | control 테스트가 entity 디렉터리에 위치 | Move Tests → `tests/control/` | **P1** |
+| 9 | `src/boundary/screen/app.py` | screen→control 직접 wiring | Extract Composition Root | **P1** |
+| 10 | `screen/constants.py` + `grid_adapter.py` | screen→entity import; `SAMPLE_G1` fixture; size 검증 중복 | GUI 상수 분리; 검증은 boundary만 | **P1** |
+| 11 | `puzzle_boundary.py` | `solve()` = `submit()` API 중복 | Inline Method 또는 API 단일화 | **P2** |
+| 12–14 | entity services | VO·private 헬퍼 미분리 | Extract Class/Method (R-03~R-05) | **P2** |
+| 15 | `main_window.py` | `_build_ui()` 37줄 | Extract Method (동작 불변) | **P3** |
+| 16 | 테스트 SSOT | D-SOL-01 docstring vs G1 기대값 불일치 | Test SSOT 정합 (R-08) | **P2** |
+
+### 테스트 선행 필요 항목 (REFACTOR 전)
+
+| 함수/대상 | 테스트 파일 | 검증 내용 |
+|-----------|-------------|-----------|
+| `solution()` / `two_cell_solver.solve()` | `tests/control/test_solver.py` | G1/G2/G3·int[6] exact·`UnsolvableDomainError` |
+| `SolveTwoBlanksUseCase.execute()` | `tests/control/test_solve_two_blanks_use_case.py` | SC-DOM-006~008; validated grid 위임·예외 전파 |
+| 격자 불변성 | `tests/control/test_solver_immutability.py` | `solution()` 호출 전후 grid deep equality |
+| `InputValidator.validate()` | `tests/boundary/test_envelope_contract.py` *(신규)* | `INVALID_SIZE`/E002/E004/E005/`DOMAIN_NO_SOLUTION` code·message |
+| `PuzzleBoundary.submit()` | 기존 `test_u_*` + envelope contract | invalid 시 `execute` 0회; success len=6 |
+| `test_d_sol_*.py` | `tests/control/` 이동 | import 경로만 변경, assertion 동일 |
+
+### REFACTOR 후 검증 (회귀 테스트)
+
+```powershell
+# 전체 기준선
+python -m pytest tests/ -v
+
+# 레이어별
+python -m pytest tests/boundary/ tests/boundary/screen/ -v
+python -m pytest tests/entity/ -v
+python -m pytest tests/control/ -v
+
+# Golden Master (int[6]·E00x·GM-TC-01~05)
+python -m pytest tests/golden_master/ -m golden_master -v
+
+# 커버리지 (기준 유지)
+python -m pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85
+python -m pytest tests/entity/ tests/control/ --cov=src/entity --cov=src/control --cov-fail-under=80
+python -m pytest tests/ --cov=src --cov-fail-under=80
+```
+
+### 외부 동작 불변 확인
+
+| 확인 항목 | 방법 |
+|-----------|------|
+| 입력 검증 envelope | `test_ac_fr_01_01_*`(25) + `test_u_in_*` — code/message·short-circuit 순서 |
+| int[6] 출력 | `test_u_out_*` + `test_d_sol_*`(control 이동 후) — len=6, 1-index, `n1≠n2` |
+| 도메인 실패 | `test_domain_no_solution.py` — `DOMAIN_NO_SOLUTION` |
+| Control 격리 | `test_u_flow_02_*` — invalid 시 `execute.call_count == 0` |
+| End-to-end | `test_puzzle_presenter.py` 통합 · GM baseline byte-identical |
+| GUI smoke | `python -m src.boundary.screen` — G1 Load → Solve |
+
+### 권장 REFACTOR 커밋 순서
+
+```
+P0: tests/control/ 선행 → R-06 (two_cell_solver) → R-01/R-02 (envelope) → R-07 (typed return)
+P1: test_d_sol 이동 → screen ECB (composition root, entity import 제거)
+P2/P3: R-03~R-05 entity VO · R-08 test SSOT · main_window Extract Method
+```
+
+---
 
 ### RED → GREEN 매핑
 
@@ -357,7 +444,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | R4 | 12 | G-05, G-06, G-07 |
 | R5 (선택) | 4 | G-05에 병합 |
 
-**권장 진행:** `R1✓ → G-01 → R2 → G-02 → G-03 → R3 → G-04 → R4 → G-05 → G-06 → G-07 → (R5) → 마무리`
+**권장 진행:** `R1✓ → G-01 → … → G-07✓ → (R5) → REFACTOR (§7.3)`
 
 ### AC-FR-01-01 Track A (R1 세부 — [docs/test_plan.md](docs/test_plan.md))
 
@@ -441,6 +528,10 @@ GREEN 완료 후 즉시 적용.
 | [Report/10. AC-FR-01-01 RED QA](Report/10.%20MagicSquare_AC_FR_01_01_RED_QA_Report.md) | AC-FR-01-01 RED 25건·실행 결과·GREEN 제안 |
 | [Report/13. FR-01~FR-05 Dual-Track RED](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) | `U-*` / `D-*` SSOT 21건 RED 설계표 |
 | [Report/16. RED/GREEN Todo & README](Report/16.%20MagicSquare_RED_GREEN_TodoList_README_Update_Report.md) | R1~R5 · G-01~G-07 체크리스트 · SSOT ID 오름차순 · README 갱신 |
+| [Report/17. G-01~G-07 GREEN Phase Wrap](Report/17.%20MagicSquare_G01_G07_GREEN_PhaseWrap_Report.md) | GREEN 완료 · Phase 마무리 · REFACTOR 백로그 R-01~R-08 |
+| [Report/19. Golden Master Regression](Report/19.%20MagicSquare_Golden_Master_Regression_Report.md) | GM-01~GM-10 · approval 회귀 · contract validators |
+| [Report/20. REFACTOR Planning & ECB Analysis](Report/20.%20MagicSquare_REFACTOR_Planning_ECB_Analysis_Report.md) | Code Review · ECB/SRP · §7.3 REFACTOR 실행 계획 |
+| [Prompting/20. REFACTOR Planning Transcript](Prompting/20.%20MagicSquare_REFACTOR_Planning_ECB_Analysis_Transcript.md) | REFACTOR 계획 세션 Turn 1~9 Export |
 | [docs/test_plan.md](docs/test_plan.md) | AC-FR-01-01 테스트 계획·경계값·실행 순서 |
 | [defect_list.md](defect_list.md) | RED 단계 결함 추적 (DEF-001~006) |
 | [Prompting/16. RED/GREEN Todo Transcript](Prompting/16.%20MagicSquare_RED_GREEN_TodoList_README_Update_Transcript.md) | 본 세션 Turn 1~4 대화 Export |
@@ -457,7 +548,8 @@ GREEN 완료 후 즉시 적용.
         └─▶ 06 Scenario Verification
               └─▶ 07 PRD
                     └─▶ 08 To-Do List + 09 README (본 문서)
-                          └─▶ tests/ + src/ (RED → GREEN → REFACTOR)
+                          └─▶ tests/ + src/ (RED → GREEN → REFACTOR §7.3)
+                                └─▶ Report/20 REFACTOR Planning
 ```
 
 ---
@@ -481,14 +573,15 @@ GREEN 완료 후 즉시 적용.
 | **G-07** U-OUT-01~03 GREEN | ✅ **3 passed** |
 | **pytest** (전체) | **53 passed** · 0 failed · 53 collected |
 | **Boundary 커버리지** | **100%** (기준 ≥85%) |
-| **REFACTOR** | 🔄 백로그 확정 (§7.2) — `refactor/*` 착수 대기 |
+| **REFACTOR** | 🔄 §7.3 실행 계획 · [Report/20](Report/20.%20MagicSquare_REFACTOR_Planning_ECB_Analysis_Report.md) — `refactor/*` **P0 테스트 선행 후 착수** |
 
 ### 다음 단계 (즉시)
 
 1. **G-* git 커밋** 정리 (§7.2 미커밋 항목)
-2. **REFACTOR** 착수: R-01~R-08 (`refactor/*` 브랜치, G 커밋과 분리)
-3. **R5** (선택): U-IN-01~03 RED → G-05 병합
-4. Domain 커버리지 95%+ 보강 (`solve_two_blanks_use_case` integration)
+2. **REFACTOR P0-0:** `tests/control/` characterization 테스트 추가
+3. **REFACTOR P0:** R-06 → R-01/R-02 → R-07 (§7.3 순서, `refactor/*` 브랜치)
+4. **R5** (선택): U-IN-01~03 RED → G-05 병합
+5. Domain+Control 커버리지 95%+ · TOTAL 90%+ (REFACTOR 후 재측정)
 
 ### 테스트 실행
 
@@ -502,9 +595,12 @@ python -m pytest tests/ -v
 # Boundary 커버리지 게이트 (≥85%)
 python -m pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85
 
-# RED 커밋별
-python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_val_*.py -v
-python -m pytest tests/boundary/test_u_*.py -v
+# Golden Master
+python -m pytest tests/golden_master/ -m golden_master -v
+
+# REFACTOR 후 control 레이어 (§7.3)
+python -m pytest tests/control/ -v
+python -m pytest tests/ --cov=src --cov-fail-under=80
 ```
 
 ### 권장 진행 순서 (RED 커밋 → GREEN)
@@ -526,7 +622,8 @@ R5 (U-IN-01~03, 4)   ──▶ G-05에 병합 (선택)
 | `main` | 안정 기준선 (문서·PRD 통합본) |
 | `spec` | 명세·계약·PRD 기준 |
 | `develop` | 통합 브랜치 (선택) |
-| `feature/*` | RED → GREEN → REFACTOR 구현 단위 |
+| `feature/*` | RED → GREEN 구현 단위 |
+| `refactor/*` | REFACTOR 구조 개선 (G 커밋과 분리, §7.3) |
 
 **PR 흐름:** `feature/...` → `main` (또는 `develop` → `main`)
 
@@ -542,19 +639,23 @@ MagicSquare_xx/
 ├── .cursor/rules/              # ECB · TDD · 코드 스타일 규칙
 ├── Report/                     # PRD · RED 설계 · QA 보고서
 ├── src/
-│   ├── boundary/               # InputValidator, PuzzleBoundary, schemas
-│   ├── control/                # SolveTwoBlanksUseCase (스텁)
-│   └── entity/                 # user.py (예제) · 향후 BlankFinder 등
+│   ├── boundary/               # InputValidator, PuzzleBoundary, schemas, error_response
+│   │   └── screen/             # MainWindow, PuzzlePresenter, grid_adapter (PyQt GUI)
+│   ├── control/                # SolveTwoBlanksUseCase, solver.py (→ two_cell_solver 이동 예정)
+│   └── entity/
+│       ├── constants.py
+│       └── services/           # blank_finder, missing_number_finder, magic_square_validator
 └── tests/
     ├── boundary/
-    │   ├── conftest.py
+    │   ├── screen/             # grid_adapter, presenter, main_window 테스트
     │   ├── test_ac_fr_01_01_*.py   # R1 — 25건
     │   └── test_u_*.py             # R4 — 12건
-    └── entity/
-        ├── test_user.py
-        ├── test_d_loc_01_*.py      # R2
-        ├── test_d_val_*.py         # R2
-        └── test_d_sol_*.py         # R3
+    ├── control/                # REFACTOR P0 — SC-DOM-006~008, solver (신규 예정)
+    ├── entity/
+    │   ├── test_d_loc_01_*.py      # R2
+    │   ├── test_d_val_*.py         # R2
+    │   └── test_d_sol_*.py         # R3 (→ control/ 이동 예정)
+    └── golden_master/          # GM-TC-01~05 회귀
 ```
 
 ---
@@ -565,4 +666,4 @@ MagicSquare_xx/
 
 ---
 
-*구현·테스트는 RED 실패 확인 후 GREEN 최소 코드만 추가합니다. 진행 상태는 §7.1·§7.2·§10 체크리스트를 SSOT로 갱신합니다.*
+*구현·테스트는 RED 실패 확인 후 GREEN 최소 코드만 추가합니다. REFACTOR는 §7.3 실행 계획·회귀 테스트를 따릅니다. 진행 상태는 §7.1·§7.2·§7.3·§10 체크리스트를 SSOT로 갱신합니다.*
