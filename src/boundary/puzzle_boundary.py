@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 from src.boundary.input_validator import Grid, InputValidator
-from src.boundary.schemas import FailureResponse, INVALID_SIZE_CODE
+from src.boundary.error_response import ErrorResponse
+from src.boundary.schemas import INVALID_SIZE_CODE
 
 
 class PuzzleBoundary:
@@ -20,14 +21,14 @@ class PuzzleBoundary:
         self._use_case = use_case
         self._validator = InputValidator()
 
-    def submit(self, grid: Grid) -> FailureResponse | Any:
+    def submit(self, grid: Grid) -> ErrorResponse | Any:
         """Validate grid; on failure return error without calling use case.
 
         Args:
             grid: Puzzle grid or None.
 
         Returns:
-            FailureResponse when validation fails; otherwise use case result.
+            ErrorResponse when validation fails; otherwise use case result.
         """
         validation = self._validator.validate(grid)
         if validation.code == INVALID_SIZE_CODE:
