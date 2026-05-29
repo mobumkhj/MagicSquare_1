@@ -6,6 +6,12 @@ from typing import Any
 
 from src.boundary.error_response import ErrorResponse
 from src.boundary.input_validator import Grid, InputValidator
+from src.boundary.schemas import (
+    DOMAIN_NO_SOLUTION_CODE,
+    DOMAIN_NO_SOLUTION_MESSAGE,
+    RESPONSE_TYPE_ERROR,
+)
+from src.entity.errors import UnsolvableDomainError
 
 
 class PuzzleBoundary:
@@ -32,7 +38,14 @@ class PuzzleBoundary:
         validation = self._validator.validate(grid)
         if validation is not None:
             return validation
-        return self._use_case.execute(grid)
+        try:
+            return self._use_case.execute(grid)
+        except UnsolvableDomainError:
+            return ErrorResponse(
+                type=RESPONSE_TYPE_ERROR,
+                code=DOMAIN_NO_SOLUTION_CODE,
+                message=DOMAIN_NO_SOLUTION_MESSAGE,
+            )
 
     def solve(self, grid: Grid) -> ErrorResponse | Any:
         """Validate and resolve a puzzle grid.

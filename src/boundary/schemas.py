@@ -17,6 +17,9 @@ E004_MESSAGE = "Each cell must be 0 or an integer from 1 to 16."
 E005_CODE = "E005"
 E005_MESSAGE = "Non-zero values must not duplicate."
 
+DOMAIN_NO_SOLUTION_CODE = "DOMAIN_NO_SOLUTION"
+DOMAIN_NO_SOLUTION_MESSAGE = "No valid magic square completion exists."
+
 
 @dataclass(frozen=True)
 class FailureResponse:

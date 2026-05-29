@@ -1,0 +1,35 @@
+---
+description: PyQt6 GUI boundary rules for Magic Square screen layer
+globs: src/boundary/screen/**/*.py
+alwaysApply: false
+---
+
+# PyQt Screen Layer (ECB Boundary)
+
+## Placement
+
+- GUI 코드는 **`src/boundary/screen/`** 에만 둔다.
+- Domain/control 로직을 위젯에 직접 넣지 않는다 — `PuzzlePresenter` → `PuzzleBoundary` 경로만 사용한다.
+
+## 의존성
+
+- **허용**: `screen` → `boundary` (puzzle_boundary, input_validator, error_response)
+- **금지**: `screen` → `entity` / `control` 직접 호출 — `PuzzlePresenter` → `PuzzleBoundary`만 사용
+
+## PyQt6 규칙
+
+- **PyQt6** 사용 (`PySide`/`PyQt5` 혼용 금지)
+- `print()` 금지 — 결과는 위젯(`QLabel` 등)에 표시
+- 비즈니스 로직은 `puzzle_presenter.py`, `grid_adapter.py`, `result_formatter.py`에 분리
+- `MainWindow`는 I/O(입력 읽기·버튼·표시)만 담당
+
+## 실행
+
+```powershell
+python -m src.boundary.screen
+```
+
+## 테스트
+
+- 위젯 없이 테스트 가능한 모듈(adapter, formatter, presenter)은 **pytest 단위 테스트** 필수
+- GUI smoke 테스트는 `pytest-qt` + `QT_QPA_PLATFORM=offscreen` 사용
