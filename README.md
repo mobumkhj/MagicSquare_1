@@ -272,10 +272,10 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 **Test ID:** `RED-BND-001`, `RED-BND-002`, `RED-BND-006`
 
 - [x] `None` / `[]` → `INVALID_SIZE` + `Grid must be 4x4.`
-- [ ] `_is_valid_size()`: `[[]]*4`, 3×4, 4×3, 5×5 → `INVALID_SIZE`
+- [x] `_is_valid_size()`: `[[]]*4`, 3×4, 4×3, 5×5 → `INVALID_SIZE`
 - [x] `FailureResponse` ↔ 테스트 `ErrorResponse` 계약 정합
-- [ ] `PuzzleBoundary.submit`: invalid 시 `execute` 0회 early return
-- [ ] GREEN 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v` → **25 passed** (현재 **17 passed · 8 failed**)
+- [x] `PuzzleBoundary.submit`: invalid 시 `execute` 0회 early return
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v` → **25 passed**
 - [ ] git 커밋: `feat(green): AC-FR-01-01 size validation and boundary isolation`
 
 ### G-02 — R2 (1/2): D-LOC-01, D-MIS-01
@@ -289,28 +289,43 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### G-03 — R2 (2/2): D-VAL-01 ~ D-VAL-06
 
-- [ ] `MagicConstant` = 34 · `is_magic_square` 행/열/대각/집합/0 금지
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `D-VAL-01` ~ `D-VAL-06`
+
+- [x] `MagicConstant` = 34 · `is_magic_square` 행/열/대각/집합/0 금지
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_val_*.py -v` → **6 passed**
+- [ ] git 커밋: `feat(green): D-VAL-01~06 magic square validation`
 
 ### G-04 — R3: D-SOL-01 ~ D-SOL-04
 
-- [ ] G1 Attempt A · G2 reverse · G3 `UnsolvableDomainError` · 출력 shape
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `D-SOL-01` ~ `D-SOL-04`
+
+- [x] G1 solution · G2 reverse · G3 `UnsolvableDomainError` · 출력 shape
+- [x] GREEN 확인: `python -m pytest tests/entity/test_d_sol_*.py -v` → **4 passed**
+- [ ] git 커밋: `feat(green): D-SOL-01~04 two-blank solver`
 
 ### G-05 — R4 (1/2): U-IN-04 ~ U-IN-08 (+ R5 시 U-IN-01~03)
 
-- [ ] short-circuit: size → empty → range → duplicate (E001~E005 envelope)
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `U-IN-04` ~ `U-IN-08`
+
+- [x] short-circuit: size → empty → range → duplicate (E002/E004/E005 envelope)
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_in_*.py -v` → **5 passed**
+- [ ] git 커밋: `feat(green): U-IN-04~08 input validation short-circuit`
 
 ### G-06 — R4 (2/2): U-FLOW-02 (a~d)
 
-- [ ] invalid 유형별 `execute.call_count == 0`
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `U-FLOW-02`
+
+- [x] invalid 유형별 `execute.call_count == 0`
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_flow_02_*.py -v` → **4 passed**
+- [ ] git 커밋: `feat(green): U-FLOW-02 invalid never calls execute`
 
 ### G-07 — R4 (3/3): U-OUT-01 ~ U-OUT-03
 
-- [ ] G1 + UseCase mock → len=6, 1-index coords, `n1≠n2`
-- [ ] GREEN 확인 · git 커밋
+**Test ID:** `U-OUT-01` ~ `U-OUT-03`
+
+- [x] G1 + UseCase mock → len=6, 1-index coords, `n1≠n2`
+- [x] GREEN 확인: `python -m pytest tests/boundary/test_u_out_*.py -v` → **3 passed**
+- [ ] git 커밋: `feat(green): U-OUT-01~03 solve output contract`
 
 ### Phase 마무리
 
@@ -337,7 +352,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 - [x] TC-A-03: `message == "Grid must be 4x4."`
 - [x] TC-A-04: `grid=None` 시 `execute` 0회 (mock/spy)
 - [x] TC-A-05: `grid=[]` → `INVALID_SIZE`
-- [ ] TC-A-06: 3×4·4×3·5×5·`[[]]*4` → `INVALID_SIZE` (GREEN G-01)
+- [x] TC-A-06: 3×4·4×3·5×5·`[[]]*4` → `INVALID_SIZE` (GREEN G-01)
 - [x] TC-A-07: 반환 타입 계약 (`FailureResponse` / `ErrorResponse` 정합)
 
 ### 커버리지 · 결함
@@ -415,9 +430,14 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | FR-01~FR-05 Dual-Track RED 설계 | ✅ [Report/13](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) |
 | **R1** AC-FR-01-01 RED (25건) | ✅ 기착수 |
 | **R2~R4** `D-*` / `U-*` RED | 🔄 스텁(`pytest.fail`) — assertion RED 전환·커밋 대기 |
-| **G-01** AC-FR-01-01 GREEN | 🔄 진행 중 (`None`/`[]`·`ErrorResponse` 통과, size·격리 **8건** FAIL) |
+| **G-01** AC-FR-01-01 GREEN | ✅ **25 passed** |
 | **G-02** D-LOC-01, D-MIS-01 GREEN | ✅ **2 passed** |
-| **pytest** (전체) | 23 passed · 30 failed · 53 collected |
+| **G-03** D-VAL-01~06 GREEN | ✅ **6 passed** |
+| **G-04** D-SOL-01~04 GREEN | ✅ **4 passed** |
+| **G-05** U-IN-04~08 GREEN | ✅ **5 passed** |
+| **G-06** U-FLOW-02 GREEN | ✅ **4 passed** |
+| **G-07** U-OUT-01~03 GREEN | ✅ **3 passed** |
+| **pytest** (전체) | **53 passed** · 0 failed · 53 collected |
 | **REFACTOR** | ❌ GREEN 완료 후 (§7.2 Phase 마무리) |
 
 ### 다음 단계 (즉시)

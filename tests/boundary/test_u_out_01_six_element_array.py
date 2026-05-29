@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
+from unittest.mock import MagicMock
 
-# from src.boundary.puzzle_boundary import PuzzleBoundary
-# from src.control.solve_two_blanks_use_case import SolveTwoBlanksUseCase
-# UseCase mock/spy: execute.return_value = [2, 2, 7, 3, 3, 10]
+from src.boundary.error_response import ErrorResponse
+from src.boundary.puzzle_boundary import PuzzleBoundary
+from src.control.solve_two_blanks_use_case import SolveTwoBlanksUseCase
+from tests.conftest import G1
 
 
 class TestUOut01SixElementArray:
@@ -15,9 +16,13 @@ class TestUOut01SixElementArray:
     def test_u_out_01_solve_valid_returns_six_element_array(self) -> None:
         """U-OUT-01 — G1 + mock [2,2,7,3,3,10] → len(result)==6, not Failure."""
         # Given: G1 grid; UseCase mock → [2, 2, 7, 3, 3, 10]
-        # boundary = PuzzleBoundary(use_case=mock_use_case)
+        mock_use_case = MagicMock(spec=SolveTwoBlanksUseCase)
+        mock_use_case.execute.return_value = [2, 2, 7, 3, 3, 10]
+        boundary = PuzzleBoundary(use_case=mock_use_case)
+
         # When: boundary.solve(matrix)
-        pytest.fail(
-            "RED: U-OUT-01 — valid solve returns six-element array, "
-            "not Failure envelope"
-        )
+        result = boundary.solve(G1)
+
+        # Then: six-element success array is returned
+        assert not isinstance(result, ErrorResponse)
+        assert len(result) == 6

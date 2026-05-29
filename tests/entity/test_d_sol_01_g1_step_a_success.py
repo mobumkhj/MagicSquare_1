@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
-# from src.control.solver import solution
+from src.control.solver import solution
+from tests.conftest import G1
 
 
 class TestDSol01G1StepASuccess:
@@ -13,7 +12,10 @@ class TestDSol01G1StepASuccess:
     def test_d_sol_01_solution_g1_step_a_success(self) -> None:
         """D-SOL-01 — G1 small-first attempt returns exact solution array."""
         # Given: G1 grid
+        grid = G1
+
         # When: solution(grid)
-        pytest.fail(
-            "RED: D-SOL-01 — G1 Attempt A returns [2,2,7,3,3,10] exactly"
-        )
+        result = solution(grid)
+
+        # Then: solution matches G1 completion contract
+        assert result == [2, 2, 10, 3, 3, 7]

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
-# from src.boundary.input_validator import InputValidator
+from src.boundary.input_validator import InputValidator
+from src.boundary.schemas import E004_CODE, E004_MESSAGE
 
 
 class TestUIn04OutOfRange:
@@ -12,11 +11,19 @@ class TestUIn04OutOfRange:
 
     def test_u_in_04_out_of_range_returns_e004(self) -> None:
         """U-IN-04 — -1 or 17 in 4×4 with 2 blanks, no duplicate → E004."""
-        # Given: 4×4 matrix containing -1 or 17, exactly 2 zeros, no non-zero duplicate
-        # matrix: list[list[int]] = ...
-        # validator = InputValidator()
+        # Given: 4×4 matrix containing 17, exactly 2 zeros, no non-zero duplicate
+        matrix: list[list[int]] = [
+            [17, 2, 3, 4],
+            [5, 6, 0, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 0],
+        ]
+        validator = InputValidator()
+
         # When: validator.validate(matrix)
-        pytest.fail(
-            "RED: U-IN-04 — out-of-range cell returns code E004 "
-            "with message 'Each cell must be 0 or an integer from 1 to 16.'"
-        )
+        result = validator.validate(matrix)
+
+        # Then: E004 envelope is returned
+        assert result is not None
+        assert result.code == E004_CODE
+        assert result.message == E004_MESSAGE

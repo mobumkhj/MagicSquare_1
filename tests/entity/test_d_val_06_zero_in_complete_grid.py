@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
+from copy import deepcopy
 
-# from src.entity.services.magic_square_validator import is_magic_square
+from src.entity.services.magic_square_validator import is_magic_square
+from tests.conftest import G0
 
 
 class TestDVal06ZeroInCompleteGrid:
@@ -15,7 +16,11 @@ class TestDVal06ZeroInCompleteGrid:
     ) -> None:
         """D-VAL-06 — G0 with a zero cell returns False."""
         # Given: G0 copy with one cell replaced by 0
+        grid = deepcopy(G0)
+        grid[0][0] = 0
+
         # When: is_magic_square(grid)
-        pytest.fail(
-            "RED: D-VAL-06 — zero in otherwise complete grid returns False"
-        )
+        result = is_magic_square(grid)
+
+        # Then: validation returns False
+        assert result is False

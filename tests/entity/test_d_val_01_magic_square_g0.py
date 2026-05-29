@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
-# from src.entity.services.magic_square_validator import is_magic_square
+from src.entity.services.magic_square_validator import is_magic_square
+from tests.conftest import G0
 
 
 class TestDVal01MagicSquareG0:
@@ -13,5 +12,10 @@ class TestDVal01MagicSquareG0:
     def test_d_val_01_is_magic_square_g0_complete_true(self) -> None:
         """D-VAL-01 — G0 is a valid complete magic square."""
         # Given: G0 complete magic square grid
+        grid = G0
+
         # When: is_magic_square(grid)
-        pytest.fail("RED: D-VAL-01 — G0 complete magic square returns True")
+        result = is_magic_square(grid)
+
+        # Then: validation returns True
+        assert result is True
