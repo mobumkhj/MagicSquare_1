@@ -14,6 +14,7 @@ from src.boundary.schemas import (
     INVALID_SIZE_MESSAGE,
     RESPONSE_TYPE_ERROR,
 )
+from src.boundary.validation_result import ValidationResult
 from src.entity.constants import (
     BLANK_CELL_VALUE,
     GRID_SIZE,
@@ -36,40 +37,35 @@ class InputValidator:
         Returns:
             ErrorResponse when validation fails; None when valid.
         """
+        return self._to_error_response(self._validate_core(grid))
+
+    def _validate_core(self, grid: Grid) -> ValidationResult:
+        """Run validation rules and return a pre-envelope result.
+
+        Args:
+            grid: 4x4 puzzle grid or None when omitted.
+
+        Returns:
+            ValidationResult indicating validity or the first failure.
+        """
         if grid is None or grid == []:
-            return ErrorResponse(
-                type=RESPONSE_TYPE_ERROR,
-                code=INVALID_SIZE_CODE,
-                message=INVALID_SIZE_MESSAGE,
-            )
+            return ValidationResult.fail(INVALID_SIZE_CODE, INVALID_SIZE_MESSAGE)
 
         if not self._is_valid_size(grid):
-            return ErrorResponse(
-                type=RESPONSE_TYPE_ERROR,
-                code=INVALID_SIZE_CODE,
-                message=INVALID_SIZE_MESSAGE,
-            )
+            return ValidationResult.fail(INVALID_SIZE_CODE, INVALID_SIZE_MESSAGE)
 
         blank_count = sum(
             1 for row in grid for cell in row if cell == BLANK_CELL_VALUE
         )
         if blank_count != 2:
-            return ErrorResponse(
-                type=RESPONSE_TYPE_ERROR,
-                code=E002_CODE,
-                message=E002_MESSAGE,
-            )
+            return ValidationResult.fail(E002_CODE, E002_MESSAGE)
 
         for row in grid:
             for cell in row:
                 if cell != BLANK_CELL_VALUE and (
                     cell < MIN_CELL_VALUE or cell > MAX_CELL_VALUE
                 ):
-                    return ErrorResponse(
-                        type=RESPONSE_TYPE_ERROR,
-                        code=E004_CODE,
-                        message=E004_MESSAGE,
-                    )
+                    return ValidationResult.fail(E004_CODE, E004_MESSAGE)
 
         seen_non_zero: set[int] = set()
         for row in grid:
@@ -77,14 +73,31 @@ class InputValidator:
                 if cell == BLANK_CELL_VALUE:
                     continue
                 if cell in seen_non_zero:
-                    return ErrorResponse(
-                        type=RESPONSE_TYPE_ERROR,
-                        code=E005_CODE,
-                        message=E005_MESSAGE,
-                    )
+                    return ValidationResult.fail(E005_CODE, E005_MESSAGE)
                 seen_non_zero.add(cell)
 
-        return None
+        return ValidationResult.ok()
+
+    def _to_error_response(
+        self, result: ValidationResult
+    ) -> ErrorResponse | None:
+        """Map a validation result to the boundary error envelope.
+
+        Args:
+            result: Outcome from ``_validate_core``.
+
+        Returns:
+            ErrorResponse when validation failed; None when valid.
+        """
+        if result.is_valid:
+            return None
+        assert result.code is not None
+        assert result.message is not None
+        return ErrorResponse(
+            type=RESPONSE_TYPE_ERROR,
+            code=result.code,
+            message=result.message,
+        )
 
     def _is_valid_size(self, grid: list[list[int]]) -> bool:
         """Return whether grid has exactly GRID_SIZE rows and columns."""

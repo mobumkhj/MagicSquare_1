@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 RESPONSE_TYPE_ERROR = "ERROR"
 INVALID_SIZE_CODE = "INVALID_SIZE"
 INVALID_SIZE_MESSAGE = "Grid must be 4x4."
@@ -19,12 +17,3 @@ E005_MESSAGE = "Non-zero values must not duplicate."
 
 DOMAIN_NO_SOLUTION_CODE = "DOMAIN_NO_SOLUTION"
 DOMAIN_NO_SOLUTION_MESSAGE = "No valid magic square completion exists."
-
-
-@dataclass(frozen=True)
-class FailureResponse:
-    """Failure envelope returned when input validation fails."""
-
-    type: str
-    code: str
-    message: str
