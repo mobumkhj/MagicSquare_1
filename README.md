@@ -206,11 +206,11 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 - [x] 모든 Acceptance Criteria가 테스트 가능한 문장인가?
 - [x] Dual-Track RED Test ID (`RED-BND-*`, `D-*`, `U-*`)가 부여되었는가?
 - [x] R1 Test Skeleton 작성 완료 (`test_ac_fr_01_01_*.py` 25건)
-- [ ] R2~R4: `pytest.fail` 스텁 → assertion RED 전환 (§7.1)
+- [x] R2~R4: `pytest.fail` 스텁 → assertion RED 전환 (§7.1)
 - [x] Boundary RED와 Logic RED가 분리되었는가? (Track A mock / Track B Domain Mock 금지)
 - [x] ECB Layer가 명확히 지정되었는가?
-- [ ] RED 확인 없이 GREEN 확장 금지 (G-01 size 분기 등 잔여 8건 우선)
-- [ ] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리)
+- [x] RED 확인 없이 GREEN 확장 금지 — G-01~G-07 GREEN 완료
+- [x] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리 · 백로그 확정)
 
 ---
 
@@ -329,9 +329,23 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### Phase 마무리
 
-- [ ] 전체: `python -m pytest tests/ -v` → **53 passed** (R5 제외 시 49)
-- [ ] Boundary 커버리지 ≥ 85%: `pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85`
-- [ ] REFACTOR 백로그 분리 (G-* 커밋과 분리)
+- [x] 전체: `python -m pytest tests/ -v` → **53 passed** (R5 제외 시 49)
+- [x] Boundary 커버리지 ≥ 85%: `pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85` → **100%**
+- [x] REFACTOR 백로그 분리 (G-* 커밋과 분리) — 아래 표, `refactor/*` 브랜치 전용
+
+#### REFACTOR 백로그 (`refactor/*` — GREEN 커밋과 분리)
+
+| 우선 | 후보 | 레이어 | 비고 |
+|:----:|------|--------|------|
+| R-01 | `ErrorCode` Enum + `ERROR_MESSAGES` / E001↔`INVALID_SIZE` SSOT 통합 | Boundary | AC-FR-01-01 vs U-IN envelope |
+| R-02 | `FailureResponse` ↔ `ErrorResponse` 단일 모델 정리 | Boundary | dataclass vs pydantic |
+| R-03 | `BlankFinder` / `CellPosition` VO 분리 | Entity | `find_blank_coords` |
+| R-04 | `MissingNumbers(small, large)` dataclass | Entity | `find_not_exist_nums` |
+| R-05 | `MagicSquareValidator` 행/열/대각 private 헬퍼 추출 | Entity | `is_magic_square` |
+| R-06 | `TwoAssignmentTrial` / `SolutionOrderResolver` | Control | `solver.py` |
+| R-07 | `Solution6` dataclass + `to_list()` | Boundary/Control | U-OUT envelope |
+| R-08 | G1 D-SOL-01 기대값 SSOT 정합 (`[2,2,7,3,3,10]` vs 도메인) | Test/Design | Report/13·수학 검증 |
+
 
 ### RED → GREEN 매핑
 
@@ -357,11 +371,11 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ### 커버리지 · 결함
 
-- [ ] Domain Logic: 95%+ (`pytest-cov`)
-- [ ] Boundary Layer: 85%+
+- [ ] Domain Logic: 95%+ (`pytest-cov`) — 현재 entity+control **~89%**
+- [x] Boundary Layer: 85%+ — **100%** (`tests/boundary/ --cov=src/boundary`)
 - [ ] 전체 TOTAL: 90%+
 - [x] [defect_list.md](defect_list.md) 생성 (DEF-001~006, 2026-05-29)
-- [ ] 모든 결함 수정 후 회귀 테스트 통과
+- [x] 모든 결함 수정 후 회귀 테스트 통과 — **53 passed**
 
 ---
 
@@ -429,7 +443,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | 아키텍처·계약·PRD | ✅ 완료 |
 | FR-01~FR-05 Dual-Track RED 설계 | ✅ [Report/13](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) |
 | **R1** AC-FR-01-01 RED (25건) | ✅ 기착수 |
-| **R2~R4** `D-*` / `U-*` RED | 🔄 스텁(`pytest.fail`) — assertion RED 전환·커밋 대기 |
+| **R2~R4** `D-*` / `U-*` RED | ✅ assertion RED · GREEN 완료 |
 | **G-01** AC-FR-01-01 GREEN | ✅ **25 passed** |
 | **G-02** D-LOC-01, D-MIS-01 GREEN | ✅ **2 passed** |
 | **G-03** D-VAL-01~06 GREEN | ✅ **6 passed** |
@@ -438,13 +452,15 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | **G-06** U-FLOW-02 GREEN | ✅ **4 passed** |
 | **G-07** U-OUT-01~03 GREEN | ✅ **3 passed** |
 | **pytest** (전체) | **53 passed** · 0 failed · 53 collected |
-| **REFACTOR** | ❌ GREEN 완료 후 (§7.2 Phase 마무리) |
+| **Boundary 커버리지** | **100%** (기준 ≥85%) |
+| **REFACTOR** | 🔄 백로그 확정 (§7.2) — `refactor/*` 착수 대기 |
 
 ### 다음 단계 (즉시)
 
-1. **G-01** 완료: `_is_valid_size()` · `PuzzleBoundary` early return · 응답 타입 정합 → `test_ac_fr_01_01_*` 25 passed
-2. **R2** assertion RED 확정 후 커밋 → **G-02** · **G-03**
-3. **R3** → **G-04** → **R4** → **G-05** · **G-06** · **G-07**
+1. **G-* git 커밋** 정리 (§7.2 미커밋 항목)
+2. **REFACTOR** 착수: R-01~R-08 (`refactor/*` 브랜치, G 커밋과 분리)
+3. **R5** (선택): U-IN-01~03 RED → G-05 병합
+4. Domain 커버리지 95%+ 보강 (`solve_two_blanks_use_case` integration)
 
 ### 테스트 실행
 
@@ -452,8 +468,11 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 # AC-FR-01-01만 (G-01 목표: 25 passed)
 python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v
 
-# 전체 기준선
-python -m pytest tests/ -q
+# 전체 기준선 (Phase 마무리)
+python -m pytest tests/ -v
+
+# Boundary 커버리지 게이트 (≥85%)
+python -m pytest tests/boundary/ --cov=src/boundary --cov-fail-under=85
 
 # RED 커밋별
 python -m pytest tests/entity/test_d_loc_01_*.py tests/entity/test_d_val_*.py -v
