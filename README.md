@@ -379,6 +379,34 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 ---
 
+## RED 단계 To-Do 리스트
+
+### Golden Master 회귀 안전장치
+
+Refactoring 시작 전 구축.  
+GREEN 완료 후 즉시 적용.
+
+#### 기준 파일 생성
+
+- [x] **GM-01**: `golden_master_expected.txt` 생성
+- [x] **GM-02**: 정상/역순/오류 시나리오 추가
+- [x] **GM-03**: `git add tests/golden_master_expected.txt`
+
+#### 테스트 코드
+
+- [x] **GM-04**: `test_golden_master_magic_square` 작성
+- [x] **GM-05**: approve 패턴 적용
+- [x] **GM-06**: Golden Master 테스트 PASS 확인 — `pytest -m golden_master -v` → **6 passed**
+
+#### 회귀 보호
+
+- [x] **GM-07**: row-major 규칙 보호
+- [x] **GM-08**: 1-index 출력 보호
+- [x] **GM-09**: reverse 조합 fallback 보호
+- [x] **GM-10**: Error Contract 보호
+
+---
+
 ## 8. Quality Gates
 
 | 항목 | 기준 |

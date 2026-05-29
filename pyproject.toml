@@ -21,6 +21,9 @@ magicsquare-gui = "src.boundary.screen.app:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "golden_master: Golden Master / approval regression tests (GM-TC-*)",
+]
 
 [build-system]
 requires = ["setuptools>=68"]
