@@ -209,7 +209,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 - [ ] R2~R4: `pytest.fail` 스텁 → assertion RED 전환 (§7.1)
 - [x] Boundary RED와 Logic RED가 분리되었는가? (Track A mock / Track B Domain Mock 금지)
 - [x] ECB Layer가 명확히 지정되었는가?
-- [ ] RED 확인 없이 GREEN 확장 금지 (G-01 size 분기 등 잔여 9건 우선)
+- [ ] RED 확인 없이 GREEN 확장 금지 (G-01 size 분기 등 잔여 8건 우선)
 - [ ] REFACTOR는 GREEN 완료 후만 (§7.2 Phase 마무리)
 
 ---
@@ -273,9 +273,9 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 
 - [x] `None` / `[]` → `INVALID_SIZE` + `Grid must be 4x4.`
 - [ ] `_is_valid_size()`: `[[]]*4`, 3×4, 4×3, 5×5 → `INVALID_SIZE`
-- [ ] `FailureResponse` ↔ 테스트 `ErrorResponse` 계약 정합
+- [x] `FailureResponse` ↔ 테스트 `ErrorResponse` 계약 정합
 - [ ] `PuzzleBoundary.submit`: invalid 시 `execute` 0회 early return
-- [ ] GREEN 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v` → **25 passed**
+- [ ] GREEN 확인: `python -m pytest tests/boundary/test_ac_fr_01_01_*.py -v` → **25 passed** (현재 **17 passed · 8 failed**)
 - [ ] git 커밋: `feat(green): AC-FR-01-01 size validation and boundary isolation`
 
 ### G-02 — R2 (1/2): D-LOC-01, D-MIS-01
@@ -335,7 +335,7 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 - [x] TC-A-04: `grid=None` 시 `execute` 0회 (mock/spy)
 - [x] TC-A-05: `grid=[]` → `INVALID_SIZE`
 - [ ] TC-A-06: 3×4·4×3·5×5·`[[]]*4` → `INVALID_SIZE` (GREEN G-01)
-- [ ] TC-A-07: 반환 타입 계약 (`FailureResponse` / `ErrorResponse` 정합)
+- [x] TC-A-07: 반환 타입 계약 (`FailureResponse` / `ErrorResponse` 정합)
 
 ### 커버리지 · 결함
 
@@ -412,8 +412,8 @@ RED 단계 착수·유지 시 아래를 확인합니다. **커밋·GREEN 진행 
 | FR-01~FR-05 Dual-Track RED 설계 | ✅ [Report/13](Report/13.%20MagicSquare_FR01_FR05_DualTrack_RED_Design_Report.md) |
 | **R1** AC-FR-01-01 RED (25건) | ✅ 기착수 |
 | **R2~R4** `D-*` / `U-*` RED | 🔄 스텁(`pytest.fail`) — assertion RED 전환·커밋 대기 |
-| **G-01** AC-FR-01-01 GREEN | 🔄 진행 중 (`None`/`[]` 통과, size·격리 9건 FAIL) |
-| **pytest** (전체) | 20 passed · 33 failed · 53 collected |
+| **G-01** AC-FR-01-01 GREEN | 🔄 진행 중 (`None`/`[]`·`ErrorResponse` 통과, size·격리 **8건** FAIL) |
+| **pytest** (전체) | 21 passed · 32 failed · 53 collected |
 | **REFACTOR** | ❌ GREEN 완료 후 (§7.2 Phase 마무리) |
 
 ### 다음 단계 (즉시)
